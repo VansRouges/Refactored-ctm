@@ -1,5 +1,4 @@
 "use client";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -8,12 +7,6 @@ import DashLogo from "./dashlogo";
 import { Icon } from "@iconify/react/dist/iconify.js";
 import { closeSidebar } from "@/store/sideBar";
 import { useDispatch } from "react-redux";
-import { account } from "@/lib/appwrite";
-import { toast } from "sonner"
-// import { clearUser } from "@/store/userSlice";
-// import { clearProfile } from "@/store/profileSlice";
-import { clearStockOption } from "@/store/stockOptionsSlice";
-import { clearCopyTrade } from "@/store/copyTradeSlice";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: "iconamoon:home-light" },
@@ -33,13 +26,11 @@ const secondaryNavigation = [
     href: "/dashboard/support",
     icon: "tabler:lifebuoy",
   },
-  // {
-  //   name: "Settings",
-  //   href: "/dashboard/settings",
-  //   icon: "solar:settings-linear",
-  // },
-  { name: "Help", href: "/dashboard/help", icon: "tabler:help" },
-  // { name: "Log out", href: "/dashboard/logout", icon: "solar:logout-outline" },
+  { 
+    name: "Help", 
+    href: "/dashboard/help", 
+    icon: "tabler:help" 
+  },
 ];
 
 
@@ -47,29 +38,6 @@ export default function Sidebar() {
   const pathname = usePathname();
   const { theme, toggleTheme } = useTheme();
   const dispatch = useDispatch();
-  // const router = useRouter();
-
-  // Appwrite logout function
-  // const logout = async () => {
-  //   try {
-  //     await account.deleteSession("current");
-  //   //   dispatch(clearUser());
-  //     // dispatch(clearProfile());
-  //     dispatch(clearStockOption());
-  //     dispatch(clearCopyTrade());
-  //     toast("Logged out successfully");
-  //     router.push("/login");
-  //     // if (typeof window !== "undefined") {
-  //     //     localStorage.removeItem("userName")
-  //     //     localStorage.removeItem("userId")
-  //     //     localStorage.removeItem("fullName")
-  //     // }
-  //   } catch (err) {
-  //     const error = err as Error;
-  //     console.error("Logout error:", error.message);
-  //     toast(`${error.message}`);
-  //   }
-  // };
 
   return (
     <div className="flex h-full w-56 flex-col border-r bg-white dark:bg-appDark">
@@ -142,17 +110,6 @@ export default function Sidebar() {
             {item.name}
           </Link>
         ))}
-        {/* <div
-          className="bg-appGold200 cursor-pointer flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium dark:text-white text-appDarkCard hover:bg-appGold20"
-          onClick={() => logout()}
-        >
-          <Icon
-            strokeWidth={1.5}
-            icon={"mdi:logout"}
-            className="h-5 w-5 text-3xl"
-          />
-          Log Out
-        </div> */}
       </nav>
     </div>
   );

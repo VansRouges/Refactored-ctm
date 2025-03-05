@@ -21,8 +21,6 @@ import {
     SelectItem,
   } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-// import { Button } from "@/components/ui/button";
-// import { Copy } from "lucide-react";
 import DepositModal from "@/components/modals/deposit-modal";
 import TransactionHash from "@/components/user-deposit/TransactionHash";
 import { UseFormReturn } from "react-hook-form";
@@ -30,9 +28,12 @@ import { useAccount } from "wagmi";
 import { PaymentModal } from "./payment-modal"
 import { useDispatch } from "react-redux";
 import { openModal } from "@/store/modalSlice";
-// import { useToast } from "@/hooks/use-toast";
 import { toast } from "sonner"
 import { useState } from "react";
+import { createDeposit } from "@/app/actions/deposit";
+import { useUser } from "@clerk/nextjs";
+import { createCopyTrade } from "@/app/actions/copytrade";
+import { createStockPurchase } from "@/app/actions/stockPurchase";
 
 interface DepositFundsProps {
   form: UseFormReturn<{ currency: string; amount: number }>;
@@ -62,32 +63,59 @@ const DepositFunds: React.FC<DepositFundsProps> = ({
   console.log("Tokens", cryptocurrencies)
   console.log("Base Error", baseError)
   console.log("selected token", form.getValues("currency"))
+  const { user } = useUser();
   const { isConnected } = useAccount();
-  const [ showPaymentModal, setShowPaymentModal ] = useState(false)
   const [open, setOpen] = useState(false)
   const dispatch = useDispatch()
 
-  // const handleDepositClick = () => {
-  //   if(!isConnected){
-  //     setShowPaymentModal(true)
-  //   } else {
-  //     form.handleSubmit(onSubmit)()
-  //   }
-  // }
 
-  const handlePaymentOption = (option: string) => {
+  const handlePaymentOption = async(option: string) => {
     if (option === "copy_wallet"){
+      await createDeposit({ 
+        token_name: form.getValues().currency,
+        amount: form.getValues().amount,
+        token_deposit_address: selectedAddress,
+        user_id: user?.id,
+        full_name: user?.fullName,
+      });
+
+      if (stockOption?.stock) {
+        createStockPurchase({
+          data: stockOption?.stock,
+          user_id: user?.id,
+          full_name: user?.fullName,
+          stock_initial_value:stockOption.stock.total,
+          stock_value_entered: form.getValues().amount,
+          stock_token: form.getValues().currency,
+          stock_quantity: stockOption?.stock?.total,
+          stock_status: "pending",
+          stock_token_address: selectedAddress,
+        })
+      }
+
+      if (copyTrade?.copy) {
+        createCopyTrade({ 
+          data: copyTrade?.copy, 
+          trade_title: copyTrade?.copy.title,
+          user_id: user?.id, 
+          full_name: user?.fullName,
+          initial_investment: form.getValues().amount,
+          trade_token: form.getValues().currency,
+          trade_token_address: selectedAddress,
+          trade_status: "pending"      
+        })
+      }
+
       dispatch(openModal({
         modalType: "deposit",
         modalProps: { address: selectedAddress, currency: form.getValues("currency"), amount: form.getValues("amount") },
       }));
-      setShowPaymentModal(false)
       setOpen(false)
     } else if (option === "connect_wallet") {
       if(!isConnected){
         setOpen(false)
         toast("Wallet Not Connected!", { description: "Please connect your wallet above."});
-      } else if(form.getValues("currency") !== "Ethereum" || "ETH" || "Eth") {
+      } else if (!["Ethereum", "ETH", "Eth"].includes(form.getValues("currency"))) {
         toast("Only ETH is supported by wallet", { description: "Please use the copy wallet option for this token"});
       } else {
         form.handleSubmit(onSubmit)();
@@ -96,17 +124,6 @@ const DepositFunds: React.FC<DepositFundsProps> = ({
     }
   };
 
-  // dispatch(
-  //     openModal({
-  //         modalType: "deposit",
-  //         modalProps: {
-  //             address: selectedAddress,
-  //             currency: data.currency,
-  //             amount: data.amount,
-  //         },
-  //     })
-  // );
-  console.log("show payment modal", showPaymentModal)
   console.log("is wallet connected", isConnected)
 
   return (
@@ -185,14 +202,10 @@ const DepositFunds: React.FC<DepositFundsProps> = ({
                       open={open}
                       setOpen={setOpen}
                       isLoading={isLoading}
-                      // handleDepositClick={handleDepositClick}
                   />
-                  {/* {baseError?.shortMessage && (
-                    <p className="text-sm text-red-500">{baseError?.shortMessage}</p>
-                  )} */}
-                    {tranHash && (
-                        <TransactionHash hash={tranHash} />
-                    )}
+                  {tranHash && (
+                      <TransactionHash hash={tranHash} />
+                  )}
                 </form>
               </FormProvider>
             </CardContent>

@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import {
   Card,
@@ -20,28 +19,24 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { TrendingUp, TrendingDown, DollarSign } from "lucide-react";
-import ENV from "@/constants/env";
-import { databases, ID } from "@/lib/appwrite";
 import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/store/hook";
 import { setStockOption } from "@/store/stockOptionsSlice";
-// import { useToast } from "@/hooks/use-toast";
 import { toast } from "sonner"
 import { TableSkeleton } from "@/skeletons";
 import { StockModal } from "./user-deposit/stock-modal";
-import { Stock, Profile } from "@/types";
+import { Stock } from "@/types";
 import { useUser } from "@clerk/nextjs";
+import { fetchStocks } from "@/app/actions/fetch-stocks";
+import { createStockPurchase } from "@/app/actions/stockPurchase";
 
 
 export function StockOptions({ portfolio }:
   { 
     portfolio: { total_investment: number, current_value: number, roi: number }, 
-    // profile: Profile | null,
-    // fetchPortfolio: () => void
   }
 ) {
   const { user } = useUser()
-  // const profile = user?.publicMetadata as unknown as Profile;
   const [stocks, setStocks] = useState<Stock[]>([]);
   const [quantities, setQuantities] = useState<{ [key: string]: number }>({});
   const [isLoading, setIsLoading] = useState(false);
@@ -50,37 +45,22 @@ export function StockOptions({ portfolio }:
   const [showSuccessMessage, setShowSuccessMessage] = useState(false)
   const dispatch = useAppDispatch();
   const router = useRouter();
-//   const { toast } = useToast();
-  const databaseId = ENV.databaseId;
-  const collectionId = ENV.collections.stockOptions;
 
   useEffect(() => {
-    const fetchStocks = async () => {
+    const getStocks = async () => {
       setIsLoading(true);
       try {
-        const response = await databases.listDocuments(
-          databaseId,
-          collectionId
-        );
-        setStocks(
-          response.documents.map((doc) => ({
-            id: doc.$id,
-            symbol: doc.symbol,
-            name: doc.name,
-            price: doc.price,
-            change: doc.change,
-            isMinus: doc.isMinus,
-          }))
-        );
+        const stocksData = await fetchStocks();
+        setStocks(stocksData);
       } catch (error) {
         console.error("Failed to fetch stocks:", error);
       } finally {
         setIsLoading(false);
       }
     };
-
-    fetchStocks();
-  }, [collectionId, databaseId]);
+  
+    getStocks();
+  }, []);
 
   const handleQuantityChange = (id: string, quantity: string) => {
     setQuantities({ ...quantities, [id]: parseInt(quantity) || 0 });
@@ -90,7 +70,6 @@ export function StockOptions({ portfolio }:
     const quantity = quantities[stock.id] || 0;
     const total = quantity * stock.price;
     const total_investment = portfolio?.total_investment ?? 0;
-    // const realTotal = portfolio.total_investment - total;
     try {
       if (quantity > 0 && total_investment < total) {
         const difference = total - total_investment;
@@ -129,46 +108,29 @@ export function StockOptions({ portfolio }:
     const total_investment = portfolio?.total_investment ?? 0;
     if (!selectedStock || total > total_investment) return;
     try {
-      const stockPurchasePayload = {
-        stock_symbol: selectedStock.symbol,
-        stock_name: selectedStock.name,
-        stock_quantity: quantities[selectedStock.id] || 1,
+      createStockPurchase({
+        data: selectedStock,
+        user_id: user?.id,
+        full_name: user?.fullName,
         stock_initial_value: total,
-        stock_initial_value_pu: selectedStock.price,
-        stock_change: selectedStock.change,
-        stock_current_value: 0.0,
-        stock_total_value: 0.0,
-        stock_profit_loss: 0.0,
-        isProfit: false,
-        isMinus: selectedStock.isMinus,
         stock_value_entered: 0.0,
         stock_token: "fromBalance",
-        stock_token_address: "fromBalance",
+        stock_quantity: quantities[selectedStock.id] || 1,
         stock_status: "approved",
-        isTrading: false,
-        full_name: user?.fullName,
-        user_id: user?.id,
-      };
-
-      await databases.createDocument(
-        ENV.databaseId,
-        ENV.collections.stockOptionsPurchases,
-        ID.unique(),
-        stockPurchasePayload
-      );
+        stock_token_address: "fromBalance",
+      })
 
       const newTotalInvestment = portfolio.total_investment - total;
       console.log("New total investment:", newTotalInvestment);
-      await databases.updateDocument(
-        ENV.databaseId,
-        ENV.collections.profile,
-        user?.id || "",
-        { total_investment: newTotalInvestment }
-      );
+      // await databases.updateDocument(
+      //   ENV.databaseId,
+      //   ENV.collections.profile,
+      //   user?.id || "",
+      //   { total_investment: newTotalInvestment }
+      // );
       setShowAlertDialog(false);
       setSelectedStock(null);
       setShowSuccessMessage(true)
-      // await fetchPortfolio();
       toast("Stock Purchased!", { description: "Thank you for your purchase!" });
     } catch (error) {
       console.error("Error purchasing stock:", error);

@@ -5,24 +5,18 @@ import { Check } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Trade } from "@/types/dashboard";
 import { useState, useEffect } from "react";
-import { databases, ID } from "@/lib/appwrite";
-import ENV from "@/constants/env";
 import { setCopyTrade } from "@/store/copyTradeSlice";
 import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/store/hook";
 import { toast } from "sonner"
-// import { useToast } from "@/hooks/use-toast";
-// import { useSelector } from "react-redux";
-// import { RootState } from "@/store/store";
 import { TradeFormModal } from "./user-deposit/trade-modal";
-// import { Profile } from "@/types";
 import { useUser } from "@clerk/nextjs";
+import { fetchTrades } from "@/app/actions/fetch-trade";
+import { createCopyTrade } from "@/app/actions/copytrade";
 
 export function CopyTradingOptions({ portfolio }: 
   { 
     portfolio: { total_investment: number, current_value: number, roi: number }, 
-    // profile: Profile | null,
-    // fetchPortfolio: () => void
   }) 
 {
     const [trades, setTrades] = useState<Trade[]>([]);
@@ -33,28 +27,16 @@ export function CopyTradingOptions({ portfolio }:
     const router = useRouter();
 
     useEffect(() => {
-      const fetchTrades = async () => {
+      const getTrades = async () => {
         try {
-          const response = await databases.listDocuments(ENV.databaseId, ENV.collections.copyTrading);
-          setTrades(
-            response.documents.map((doc) => ({
-              id: doc.$id,
-              trade_title: doc.trade_title,
-              trade_max: doc.trade_max,
-              trade_min: doc.trade_min,
-              trade_roi_min: doc.trade_roi_min,
-              trade_roi_max: doc.trade_roi_max,
-              trade_description: doc.trade_description,
-              trade_risk: doc.trade_risk,
-              trade_duration: doc.trade_duration,
-            }))
-          );
+          const tradesData = await fetchTrades();
+          setTrades(tradesData);
         } catch (error) {
           console.error("Failed to fetch trades:", error);
         }
       };
-
-      fetchTrades();
+    
+      getTrades();
     }, []);
 
     const handlePurchase = (trade: Trade) => {
@@ -94,43 +76,27 @@ export function CopyTradingOptions({ portfolio }:
     const handleTradePurchase = async (amount: number) => {
       if (!selectedTrade || amount > portfolio.total_investment) return;
       try {
-        const copyTradePayload = {
+        createCopyTrade({ 
+          data: selectedTrade, 
           trade_title: selectedTrade.trade_title,
-          trade_min: selectedTrade.trade_min,
-          trade_max: selectedTrade.trade_max,
-          trade_roi_min: selectedTrade.trade_roi_min,
-          trade_roi_max: selectedTrade.trade_roi_max,
-          trade_win_rate: 0.0,
-          trade_risk: selectedTrade.trade_risk,
-          trade_current_value: 0.0,
-          trade_profit_loss: 0.0,
-          isProfit: false,
+          user_id: user?.id, 
+          full_name: user?.fullName,
           initial_investment: amount,
           trade_token: "fromBalance",
           trade_token_address: "fromBalance",
           trade_status: "approved",
-          full_name: user?.fullName,
-          user_id: user?.id,
-        };
-
-        await databases.createDocument(
-          ENV.databaseId,
-          ENV.collections.copyTradingPurchases,
-          ID.unique(),
-          copyTradePayload
-        );
-
+        })
+        
         const newTotalInvestment = portfolio.total_investment - amount;
         console.log("New total investment:", newTotalInvestment);
-        await databases.updateDocument(
-          ENV.databaseId,
-          ENV.collections.profile,
-          user?.id || "",
-          { total_investment: newTotalInvestment }
-        );
+        // await databases.updateDocument(
+        //   ENV.databaseId,
+        //   ENV.collections.profile,
+        //   user?.id || "",
+        //   { total_investment: newTotalInvestment }
+        // );
         setOpen(false);
         setSelectedTrade(null);
-        // await fetchPortfolio();
         toast("Trade Purchased!", { description: "Thank you for your purchase!" });
       } catch (error) {
         console.error("Error creating trade:", error);

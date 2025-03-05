@@ -1,18 +1,26 @@
-export const fetchCryptocurrencies = async () => {
+export const createDeposit = async (data: {
+    token_name: string;
+    amount: number;
+    token_deposit_address: string;
+    user_id: string | null | undefined;
+    full_name: string | null | undefined;
+  }) => {
     try {
-      const response = await fetch("/api/fetch-crypto", {
-        method: "GET",
-        cache: "no-store", // Ensures fresh data (optional)
+      const response = await fetch("/api/deposit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
       });
   
+      const result = await response.json();
+  
       if (!response.ok) {
-        throw new Error("Failed to fetch cryptocurrency data");
+        throw new Error(result.error || "Failed to create transaction");
       }
   
-      const data = await response.json();
-      return data.data; // Extract array of cryptocurrencies
+      return result;
     } catch (error) {
-      console.error("Error fetching cryptocurrencies:", error);
+      console.error("Transaction API Error:", error);
       throw error;
     }
   };

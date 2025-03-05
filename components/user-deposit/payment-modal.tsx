@@ -1,5 +1,4 @@
 "use client"
-
 import React from "react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
@@ -48,7 +47,6 @@ export function PaymentModal({ handlePaymentOption, open, setOpen, handleDeposit
                     <Button
                         type="button"
                         className="w-full text-appDarkCard bg-appCardGold"
-                        // onClick={handleDepositClick}
                         disabled={isLoading}
                     >
                         {isLoading ? "Processing..." : "Deposit"}
