@@ -22,11 +22,16 @@ export async function GET(request: Request) {
       $id: doc.$id,
       stock_symbol: doc.stock_symbol,
       stock_name: doc.stock_name,
-      purchase_price: doc.purchase_price,
-      current_price: doc.current_price,
-      shares_owned: doc.shares_owned,
-      total_value: doc.total_value,
-      purchase_date: doc.purchase_date,
+      stock_quantity: doc.stock_quantity,
+      stock_initial_value: doc.stock_initial_value,
+      stock_initial_value_pu: doc.stock_initial_value_pu,
+      stock_current_value: doc.stock_current_value,
+      stock_status: doc.stock_status,
+      isProfit: doc.isProfit,
+      stock_profit_loss: doc.stock_profit_loss,
+      stock_change: doc.stock_change,
+      isMinus: doc.isMinus,
+      isTrading: doc.isTrading,
     }));
 
     return NextResponse.json({ success: true, purchasedStocks }, { status: 200 });

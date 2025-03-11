@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,12 +19,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ArrowUpDown, RefreshCw } from "lucide-react";
-import { databases, Query } from "@/lib/appwrite"; // Import your database client
-import ENV from "@/constants/env";
-// import { useProfile } from "@/app/context/ProfileContext"; // Import environment variables
 import { TableSkeleton } from "@/skeletons";
 import { useUser } from "@clerk/nextjs";
 import { fetchPurchasedStocks } from "@/app/actions/fetchPurchasedStocks";
+import { createCopyStockTrade } from "@/app/actions/copyStockTrade";
+import { toast } from "sonner"
+import { updateCreateStock } from "@/app/actions/stockPurchase";
 
 interface Stock {
   $id: string;
@@ -53,19 +52,21 @@ const StockPage = () => {
   });
   const [filter, setFilter] = useState("all");
   const [isLoading, setIsLoading] = useState(false);
+  const [creatingTrade, setCreatingTrade] = useState(false);
+
+  const getPurchasedStocks = async () => {
+    setIsLoading(true);
+    try {
+      const purchasedStocks = await fetchPurchasedStocks(user_id);
+      setStocks(purchasedStocks);
+    } catch (error) {
+      console.error("Error fetching purchased stocks:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const getPurchasedStocks = async () => {
-      setIsLoading(true);
-      try {
-        const purchasedStocks = await fetchPurchasedStocks(user_id);
-        setStocks(purchasedStocks);
-      } catch (error) {
-        console.error("Error fetching purchased stocks:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
   
     getPurchasedStocks();
   }, [user_id]);
@@ -110,6 +111,42 @@ const StockPage = () => {
     return Number((quantity * current_value).toFixed(2)); // Returns a number instead of a string
   };
 
+  console.log("Stocks", stocks)
+
+  const handleCopyTrade = async (stock: Stock) => {
+    setCreatingTrade(true)
+    try{
+      createCopyStockTrade({
+        initial_investment: stock?.stock_initial_value,
+        trade_min: 0,
+        trade_max: 0,
+        trade_roi_min : 0,
+        trade_roi_max : 0,
+        trade_risk : "medium",
+        isProfit: stock?.isProfit,
+        trade_current_value: 0,
+        trade_title: stock?.stock_symbol,
+        trade_token: "stock",
+        trade_token_address: "stock",
+        trade_status: "approved",
+        trade_profit_loss: stock?.stock_profit_loss,
+        trade_win_rate: 0,
+        full_name: user?.fullName,
+        user_id: user?.id
+      })
+      const isTrading: boolean = true
+      updateCreateStock(stock?.$id, isTrading)
+      toast.success("Copy Trade Created")
+      getPurchasedStocks()
+    } catch(err){
+      console.error("Error creating copy trade:", err);
+      toast.error("Error creating copy trade")
+    } finally {
+      setCreatingTrade(false)
+      getPurchasedStocks()
+    }
+  }
+
   return (
     <div className="flex h-full justify-center items-center w-full">
       <motion.div
@@ -133,7 +170,7 @@ const StockPage = () => {
               </Select>
               <Button
                 className="bg-appCardGold w-full sm:w-max"
-                onClick={() => window.location.reload()}
+                onClick={() => getPurchasedStocks()}
               >
                 <RefreshCw className="mr-2 h-4 w-4" />
                 Refresh Prices
@@ -204,7 +241,7 @@ const StockPage = () => {
                     <TableHead>Total Value</TableHead>
                     <TableHead>Profit/Loss</TableHead>
                     <TableHead>% Change</TableHead>
-                    <TableHead></TableHead>
+                    <TableHead>Action</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -288,8 +325,16 @@ const StockPage = () => {
                         )}
                       </TableCell>
                       <TableCell>
-                        {stock?.stock_status == "approved" && (
-                          <Button className="bg-appCardGold w-full sm:w-max">
+                        {stock?.stock_status === "approved" && (
+                          <Button 
+                            className="bg-appCardGold w-full sm:w-max"
+                            disabled={creatingTrade}
+                            onClick={() => {
+                              if (!stock?.isTrading) {
+                                handleCopyTrade(stock);
+                              }
+                            }}
+                          >
                             {stock?.isTrading ? "View Trade" : "Copy Trade"}
                           </Button>
                         )}

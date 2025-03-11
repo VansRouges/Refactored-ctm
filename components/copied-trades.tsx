@@ -109,10 +109,12 @@ const CopyTradingPage = () => {
       currency: "USD",
     }).format(value);
 
-  const handleManage = (trade: TradePayload) => {
-    setSelectedTrade(trade);
-    setIsManageModalOpen(true);
-  };
+  // const handleManage = (trade: TradePayload) => {
+  //   setSelectedTrade(trade);
+  //   setIsManageModalOpen(true);
+  // };
+  console.log("CopyTradingData", copyTradingData)
+
 
   return (
     <div className="flex h-full justify-center items-center w-full">
@@ -178,7 +180,7 @@ const CopyTradingPage = () => {
                         )}
                       </TableHead>
                     ))}
-                    <TableHead>Action</TableHead>
+                    {/* <TableHead>Action</TableHead> */}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -257,7 +259,7 @@ const CopyTradingPage = () => {
                           className={`px-2 py-1 capitalize rounded-full text-xs ${
                             trade.trade_risk === "low"
                               ? "bg-green-200 text-green-800"
-                              : trade.trade_risk === "medium"
+                              : trade.trade_risk === "medium" || "Medium"
                               ? "bg-yellow-200 text-yellow-800"
                               : "bg-red-200 text-red-800"
                           }`}
@@ -280,7 +282,7 @@ const CopyTradingPage = () => {
                           </span>
                         )}
                       </TableCell>
-                      <TableCell>
+                      {/* <TableCell>
                         <Button
                           variant="outline"
                           size="sm"
@@ -288,7 +290,7 @@ const CopyTradingPage = () => {
                         >
                           Manage
                         </Button>
-                      </TableCell>
+                      </TableCell> */}
                     </TableRow>
                   ))}
                 </TableBody>

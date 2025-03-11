@@ -59,3 +59,21 @@ export const createStockPurchase = async ({
     }
   };
   
+
+  export async function updateCreateStock(id: string, isTrading: boolean) {
+    try {
+        const response = await fetch("/api/stock-purchase", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id, isTrading }),
+        });
+
+        const data = await response.json();
+        if (!data.success) throw new Error(data.error);
+
+        return true;
+    } catch (error) {
+        console.error("Error updating support request:", error);
+        return false;
+    }
+}
