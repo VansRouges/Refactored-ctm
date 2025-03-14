@@ -117,7 +117,7 @@ const TransactionHistory = () => {
     fetchTokens();
     dispatch(clearStockOption());
     dispatch(clearCopyTrade());
-  }, [user]);
+  }, [user, dispatch]);
 
   const handleSort = (key: keyof Transaction) => {
     if (!sortConfig || !transactions) {

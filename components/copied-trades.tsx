@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -53,25 +53,27 @@ const CopyTradingPage = () => {
     direction: "desc",
   });
   const [filter, setFilter] = useState<string>("all");
-  const [selectedTrade, setSelectedTrade] = useState<TradePayload | null>(null);
+  const [selectedTrade] = useState<TradePayload | null>(null);
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-    const getTrades = async () => {
-      setIsLoading(true);
-      try {
-        const copiedTrades = await fetchCopiedTrades(user_id);
-        setCopyTradingData(copiedTrades);
-      } catch (error) {
-        console.error("Error fetching copied trades:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const getTrades = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const copiedTrades = await fetchCopiedTrades(user_id);
+      setCopyTradingData(copiedTrades);
+    } catch (error) {
+      console.error("Error fetching copied trades:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user_id]);
 
   useEffect(() => {
     getTrades();
-  }, [user_id]);
+  }, [user_id, getTrades]);
+
+  
 
   const handleSort = (key: keyof TradePayload) => {
     setSortConfig((prevConfig) => ({

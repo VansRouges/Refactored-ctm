@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -77,7 +76,7 @@ export default function TransactionsPage() {
     };
 
     fetchTransactions();
-  }, [toast]);
+  }, []);
 
   const handleApprove = async (id: string) => {
     try {

@@ -16,7 +16,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     dispatch(clearStockOption());
     dispatch(clearCopyTrade());
-  }, []);
+  }, [dispatch]);
 
   return (
     <div className="container mx-auto p-6">

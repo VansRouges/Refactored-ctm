@@ -9,7 +9,7 @@ export const createStockPurchase = async ({
   stock_initial_value,
   stock_token_address,
 }: {
-  data: any;
+  data: { symbol: string; name: string; price: number; change: number; isMinus: boolean };
   user_id: string | null | undefined;
   full_name: string | null | undefined;
   stock_value_entered: number;

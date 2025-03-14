@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -54,7 +54,7 @@ const StockPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [creatingTrade, setCreatingTrade] = useState(false);
 
-  const getPurchasedStocks = async () => {
+  const getPurchasedStocks = useCallback(async () => {
     setIsLoading(true);
     try {
       const purchasedStocks = await fetchPurchasedStocks(user_id);
@@ -64,12 +64,12 @@ const StockPage = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user_id])
 
   useEffect(() => {
   
     getPurchasedStocks();
-  }, [user_id]);
+  }, [user_id, getPurchasedStocks]);
 
   const handleSort = (key: keyof Stock) => {
     let direction = "asc";

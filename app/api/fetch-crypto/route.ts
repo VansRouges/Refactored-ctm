@@ -9,7 +9,7 @@ export async function GET() {
       ENV.collections.cryptoOptions
     );
 
-    const cryptoData = response.documents.map((doc: any) => ({
+    const cryptoData = response.documents.map((doc) => ({
       id: doc?.$id,
       name: doc?.token_symbol,
       value: doc?.token_name,

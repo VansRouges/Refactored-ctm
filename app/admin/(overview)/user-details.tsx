@@ -142,7 +142,7 @@ const UserDetails: React.FC<UserDetailsProps> = ({
     };
 
     fetchCryptocurrencies();
-  }, [toast]);
+  }, []);
 
   const handleCurrencyChange = (currency: string) => {
     const selectedCrypto: DepositCryptocurrency | undefined = cryptocurrencies.find(crypto => crypto.value === currency);

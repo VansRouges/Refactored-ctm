@@ -56,7 +56,7 @@ const Deposit = () => {
     };
 
     getCryptocurrencies();
-  }, [toast]);
+  }, []);
 
   interface FormData {
     currency: string;
@@ -125,7 +125,7 @@ const Deposit = () => {
       };
       handleTransactionSuccess();
     }
-  }, [isConfirmed, copyTrade.copy, dispatch, form, user?.fullName, user?.id, selectedAddress, stockOption.stock, toast]);
+  }, [isConfirmed, copyTrade.copy, dispatch, form, user?.fullName, user?.id, selectedAddress, stockOption.stock]);
 
 
   const handleCurrencyChange = (currency: string) => {

@@ -1,5 +1,5 @@
 "use client";
-import { use, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -40,7 +40,7 @@ export default function AdminCopyTrading() {
   const collectionId = ENV.collections.copyTrading;
 
   // Fetch traders from Appwrite on component mount
-  const fetchTraders = async () => {
+  const fetchTraders = useCallback(async () => {
     setIsLoading(true);
     try {
       const response = await databases.listDocuments(
@@ -67,7 +67,7 @@ export default function AdminCopyTrading() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [databaseId, collectionId]);
 
     
 
@@ -193,7 +193,7 @@ export default function AdminCopyTrading() {
 
   useEffect(() => {
     fetchTraders();
-  }, []);
+  }, [fetchTraders]);
 
   return (
     <Card className="w-full">

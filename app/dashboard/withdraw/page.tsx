@@ -79,7 +79,7 @@ const Withdrawal = () => {
         getCryptocurrencies();
         dispatch(clearStockOption());
         dispatch(clearCopyTrade());
-    }, [toast]);
+    }, [dispatch]);
 
     const onSubmit = async (data: WithdrawalFormValues) => {
         try {
@@ -91,6 +91,7 @@ const Withdrawal = () => {
       
           console.log("Withdrawal Transaction:", transaction);
         } catch (error) {
+            console.error("Error creating withdrawal:", error)
           toast("Error", {
             description: "Failed to create withdrawal transaction.",
           });

@@ -5,7 +5,7 @@ import { StockOptions } from "@/components/stock-options";
 import { useDispatch } from "react-redux";
 import TradingViewWidget from "@/components/TradingViewWidget"
 import { useEffect } from "react";
-import { toast } from "sonner"
+// import { toast } from "sonner"
 import { clearStockOption } from "@/store/stockOptionsSlice";
 import { clearCopyTrade } from "@/store/copyTradeSlice";
 import { useUser } from "@clerk/nextjs";
@@ -23,7 +23,7 @@ export default function UserDashboard() {
     useEffect(() => {
         dispatch(clearStockOption());
         dispatch(clearCopyTrade());
-    }, [toast]);
+    }, [dispatch]);
     
 //   console.log("User Portfolio", userPortfolio)
 

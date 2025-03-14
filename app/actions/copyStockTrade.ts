@@ -27,7 +27,7 @@ export const createCopyStockTrade = async (data : {
         console.log("Copy trade created successfully", response)
         return await response.json();
       } catch (error) {
-        console.error("Error in createCopyTrade:", error);
+        console.error("Error in createCopyStockTrade:", error);
         throw error;
       }
     };

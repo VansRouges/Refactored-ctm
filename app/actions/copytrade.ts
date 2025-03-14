@@ -8,7 +8,13 @@ export const createCopyTrade = async ({
   user_id,
   full_name,
 }: {
-  data: any;
+  data: {
+    trade_min: number;
+    trade_max: number;
+    trade_roi_min: number;
+    trade_roi_max: number;
+    trade_risk: string;
+  };
   initial_investment: number;
   trade_title: string;
   trade_token: string;

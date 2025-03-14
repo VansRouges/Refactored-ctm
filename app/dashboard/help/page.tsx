@@ -50,7 +50,7 @@ const Help = () => {
       dispatch(clearStockOption());
       dispatch(clearCopyTrade());
     };
-  }, []);
+  }, [dispatch]);
 
 
   return (
