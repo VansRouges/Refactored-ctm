@@ -42,9 +42,8 @@ interface DepositFundsProps {
   handleCurrencyChange: (value: string) => void;
   onSubmit: (data: { currency: string; amount: number }) => void;
   isLoading: boolean;
-  stockOption: { stock: { total: number } };
-  copyTrade: { copy: { title: string; trade_min: number; trade_max: number; trade_risk: string;  trade_roi_min: number;
-    trade_roi_max: number; } };
+  stockOption: { stock: { total: number; symbol: string; name: string; price: number; change: number; isMinus: boolean; } };
+  copyTrade: { copy: { title: string; trade_min: number; trade_max: number; trade_risk: string;  trade_roi_min: number; trade_roi_max: number; } };
   baseError: { shortMessage: string };
   tranHash: string;
 }
@@ -82,14 +81,7 @@ const DepositFunds: React.FC<DepositFundsProps> = ({
 
       if (stockOption?.stock) {
         createStockPurchase({
-          data: {
-            ...stockOption?.stock,
-            symbol: "defaultSymbol",
-            name: "defaultName",
-            price: 0,
-            change: 0,
-            isMinus: false,
-          },
+          data: stockOption?.stock,
           user_id: user?.id,
           full_name: user?.fullName,
           stock_initial_value:stockOption.stock.total,
