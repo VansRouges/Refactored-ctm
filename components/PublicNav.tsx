@@ -18,13 +18,13 @@ const PublicNav = () => {
         <div className="hidden md:flex gap-1">
           <Link
             className="px-4 py-1 text-sm rounded bg-appCardGold text-appDarkCard"
-            href={"/login"}
+            href={"/sign-in"}
           >
             Log in
           </Link>
           <Link
             className="px-4 py-1 text-sm rounded border border-appGold200"
-            href={"/signup"}
+            href={"/sign-up"}
           >
             Sign Up
           </Link>
