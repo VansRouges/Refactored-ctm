@@ -29,3 +29,21 @@ export async function updateSupportRequestStatus(id: string, newStatus: string) 
         return false;
     }
 }
+
+export async function deleteSupportRequest(id: string) {
+    try {
+        const response = await fetch("/api/support", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id }),
+        });
+
+        const data = await response.json();
+        if (!data.success) throw new Error(data.error);
+
+        return true;
+    } catch (error) {
+        console.error("Error deleting support request:", error);
+        return false;
+    }
+}

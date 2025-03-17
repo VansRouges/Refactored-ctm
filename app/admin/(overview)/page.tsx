@@ -7,9 +7,12 @@ import { databases, Query } from "@/lib/appwrite";
 import ENV from "@/constants/env";
 import { toast } from "sonner" 
 import type { User } from "@/types";
+import { useUser } from "@clerk/nextjs";
 
 
 const AdminPanel: React.FC = () => {
+  const { user } = useUser()
+  console.log("Public metadata", user?.publicMetadata)
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   console.log("user", selectedUser);
 

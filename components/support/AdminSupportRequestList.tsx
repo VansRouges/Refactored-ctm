@@ -1,5 +1,4 @@
 "use client"
-
 import { useState } from "react"
 import type { SupportRequest } from "./type"
 import { PriorityBadge } from "./PriorityBadge"
@@ -9,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { AdminSupportRequestDetails } from "./AdminSupportRequestDetails"
 import { TableSkeleton } from "@/skeletons"
+import { deleteSupportRequest } from "@/app/actions/support"
+import { Trash } from "lucide-react"
 
 interface AdminSupportRequestListProps {
     requests: SupportRequest[]
@@ -28,6 +29,17 @@ export function AdminSupportRequestList({ requests, onStatusUpdate, isLoading }:
         onStatusUpdate(id, newStatus)
     }
 
+    const handleDelete = async (id: string) => {
+        const isDeleted = await deleteSupportRequest(id);
+        if (isDeleted) {
+            console.log("Support request deleted successfully!");
+            // Optionally, refresh the list of support requests
+        } else {
+            console.error("Failed to delete support request.");
+        }
+    };
+    
+
     return (
         <>
             {isLoading ? (
@@ -41,6 +53,7 @@ export function AdminSupportRequestList({ requests, onStatusUpdate, isLoading }:
                         <TableHead>Priority</TableHead>
                         <TableHead className="hidden md:table-cell">Created</TableHead>
                         <TableHead className="hidden md:table-cell">Updated</TableHead>
+                        <TableHead className="hidden md:table-cell">Actions</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -72,6 +85,7 @@ export function AdminSupportRequestList({ requests, onStatusUpdate, isLoading }:
                             </TableCell>
                             <TableCell className="hidden md:table-cell">{new Date(request.createdAt).toLocaleDateString()}</TableCell>
                             <TableCell className="hidden md:table-cell">{new Date(request.updatedAt).toLocaleDateString()}</TableCell>
+                            <TableCell className="hidden md:table-cell"><Trash onClick={() => handleDelete(request.$id)} /></TableCell>
                         </TableRow>
                     ))}
                 </TableBody>

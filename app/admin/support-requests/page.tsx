@@ -19,7 +19,7 @@ export default function AdminSupportCenter() {
         };
 
         loadSupportRequests();
-    }, []);
+    }, [isLoading]);
 
     const handleStatusUpdate = async (id: string, newStatus: string) => {
         const success = await updateSupportRequestStatus(id, newStatus);

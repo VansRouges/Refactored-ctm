@@ -17,24 +17,31 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.next()
   }
 
-  // Protect all other routes
-  const user = await auth()
+  // Fetch the authenticated user and their role
+  const { sessionClaims } = await auth()
+  const userRole = sessionClaims?.metadata?.role
 
-  // Protect admin routes and ensure user has 'admin' role
-  if (isAdminRoute(req)) {
-    const userRole = user.sessionClaims?.metadata?.role
-    if (userRole !== 'admin') {
-      return NextResponse.redirect(new URL('/', req.url))
-    }
+  // Redirect logic based on role
+  if (userRole === 'admin' && !isAdminRoute(req)) {
+    // If the user is an admin and not already on an admin route, redirect to /admin
+    return NextResponse.redirect(new URL('/admin', req.url))
+  } else if (userRole !== 'admin' && !isDashboardRoute(req)) {
+    // If the user is not an admin and not already on a dashboard route, redirect to /dashboard
+    return NextResponse.redirect(new URL('/dashboard', req.url))
   }
 
-  // Protect dashboard routes
+  // Protect admin routes: only admins can access them
+  if (isAdminRoute(req) && userRole !== 'admin') {
+    return NextResponse.redirect(new URL('/', req.url))
+  }
+
+  // Protect dashboard routes: only authenticated users can access them
   if (isDashboardRoute(req)) {
     await auth.protect()
   }
 
-  // Default protection for all non-public routes
-  await auth.protect()
+  // Default behavior for all other protected routes
+  return NextResponse.next()
 })
 
 export const config = {

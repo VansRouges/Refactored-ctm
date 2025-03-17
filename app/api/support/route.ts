@@ -42,3 +42,20 @@ export async function PUT(req: Request) {
         return NextResponse.json({ success: false, error: "Failed to update request status" }, { status: 500 });
     }
 }
+
+export async function DELETE(req: Request) {
+    try {
+        const { id } = await req.json();
+
+        if (!id) {
+            return NextResponse.json({ success: false, error: "Missing required parameter: id" }, { status: 400 });
+        }
+
+        await databases.deleteDocument(databaseId, collectionId, id);
+
+        return NextResponse.json({ success: true, message: `Support request ${id} deleted successfully` });
+    } catch (error) {
+        console.error("Failed to delete support request:", error);
+        return NextResponse.json({ success: false, error: "Failed to delete support request" }, { status: 500 });
+    }
+}
