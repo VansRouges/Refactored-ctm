@@ -10,16 +10,16 @@ export default function AdminSupportCenter() {
     const [requests, setRequests] = useState<SupportRequest[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
-    useEffect(() => {
-        const loadSupportRequests = async () => {
-            setIsLoading(true);
-            const supportRequests = await fetchSupportRequests();
-            setRequests(supportRequests);
-            setIsLoading(false);
-        };
+    const loadSupportRequests = async () => {
+        setIsLoading(true);
+        const supportRequests = await fetchSupportRequests();
+        setRequests(supportRequests);
+        setIsLoading(false);
+    };
 
+    useEffect(() => {
         loadSupportRequests();
-    }, [isLoading]);
+    }, []);
 
     const handleStatusUpdate = async (id: string, newStatus: string) => {
         const success = await updateSupportRequestStatus(id, newStatus);
@@ -44,7 +44,13 @@ export default function AdminSupportCenter() {
                 <h1 className="text-3xl font-bold">Admin Support Center</h1>
             </div>
             <div className="bg-card rounded-lg shadow-md p-6">
-                <AdminSupportRequestList isLoading={isLoading} requests={requests} onStatusUpdate={handleStatusUpdate} />
+                <AdminSupportRequestList 
+                    isLoading={isLoading} 
+                    requests={requests} 
+                    fetchRequests={loadSupportRequests}
+                    onStatusUpdate={handleStatusUpdate} 
+                    setIsLoading={setIsLoading}
+                />
             </div>
         </div>
     );

@@ -1,3 +1,18 @@
+export interface CopyTradingOption {
+  $id: string;
+  trade_title: string;
+  trade_token: string;
+  initial_investment: number;
+  trade_current_value: number;
+  isProfit: boolean;
+  trade_profit_loss: number;
+  trade_win_rate: number;
+  trade_risk: string;
+  copiedSince: string;
+  $createdAt: string;
+  trade_status: string;
+}
+
 export interface Testimonial {
     name: string;
     role: string;

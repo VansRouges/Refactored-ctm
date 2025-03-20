@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-
 import React from "react";
 import {
     Dialog,
@@ -20,10 +18,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { databases } from "@/lib/appwrite"; // Ensure appwriteConfig is correctly configured and imported
-import ENV from "@/constants/env"
-// import { useToast } from "@/hooks/use-toast";
 import { toast } from "sonner"
+import { updateTrade } from "@/app/actions/admin/copytrade";
+import { formatCurrency } from "@/lib/utils";
 
 interface AdminManageCopyTradingModalProps {
     isOpen: boolean;
@@ -38,58 +35,57 @@ const AdminManageCopyTradingModal: React.FC<AdminManageCopyTradingModalProps> = 
     const isDisabled = selectedOption?.trade_status === "pending" || selectedOption?.trade_status === "rejected";
     console.log("Selected Trade Option", selectedOption);
 
-    const handleSave = async () => {
+    const handleSave = async () => { 
         setIsLoading(true);
-
+    
         const validTradeCurrentValue = parseFloat(selectedOption?.trade_current_value);
         const validTradeProfitLoss = parseFloat(selectedOption?.trade_profit_loss);
         const validTradeWinRate = parseFloat(selectedOption?.trade_win_rate);
-
+    
         if (isNaN(validTradeCurrentValue)) {
-            console.error("Invalid trade_current_value:", selectedOption?.trade_current_value);
-            toast("Error", {
-                description: "Trade current value must be a valid number.",
-            });
-            return;
+          console.error("Invalid trade_current_value:", selectedOption?.trade_current_value);
+          toast("Error", {
+            description: "Trade current value must be a valid number.",
+          });
+          return;
         }
         if (isNaN(validTradeProfitLoss)) {
-            console.error("Invalid trade_profit_loss:", selectedOption?.trade_profit_loss);
-            toast("Error", {
-                description: "Trade profit/loss must be a valid number."
-            });
-            return;
+          console.error("Invalid trade_profit_loss:", selectedOption?.trade_profit_loss);
+          toast("Error", {
+            description: "Trade profit/loss must be a valid number.",
+          });
+          return;
         }
         if (isNaN(validTradeWinRate)) {
-            console.error("Invalid trade_win_rate:", selectedOption?.trade_win_rate);
-            toast("Error", {
-                description: "Trade win rate must be a valid number."
-            });
-            return;
+          console.error("Invalid trade_win_rate:", selectedOption?.trade_win_rate);
+          toast("Error", {
+            description: "Trade win rate must be a valid number.",
+          });
+          return;
         }
-
+    
         try {
-            const updatedFields = {
-                trade_current_value: validTradeCurrentValue,
-                trade_profit_loss: validTradeProfitLoss,
-                isProfit: selectedOption.isProfit,
-                trade_win_rate: validTradeWinRate,
-            };
-
-            await databases.updateDocument(
-                ENV.databaseId, // Replace with your Appwrite database ID
-                ENV.collections.copyTradingPurchases, // Replace with your Appwrite collection ID
-                selectedOption.$id, // Document ID
-                updatedFields
-            );
-            toast("Success", {
-                description: "Trade Updated successfully",
-            });
-            console.log("Trade updated successfully:", updatedFields);
-            onClose();
+          const updatedFields = {
+            trade_current_value: validTradeCurrentValue,
+            trade_profit_loss: validTradeProfitLoss,
+            isProfit: selectedOption.isProfit,
+            trade_win_rate: validTradeWinRate,
+          };
+    
+          await updateTrade(selectedOption.$id, updatedFields);
+    
+          toast("Success", {
+            description: "Trade updated successfully.",
+          });
+          console.log("Trade updated successfully:", updatedFields);
+          onClose();
         } catch (error) {
-            console.error("Error updating trade:", error);
+          console.error("Error updating trade:", error);
+          toast("Error", {
+            description: "Failed to update trade. Please try again.",
+          });
         } finally {
-            setIsLoading(false);
+          setIsLoading(false);
         }
     };
 
@@ -109,7 +105,7 @@ const AdminManageCopyTradingModal: React.FC<AdminManageCopyTradingModalProps> = 
                 </DialogHeader>
                 <DialogDescription>
                     This user, <b>{selectedOption?.full_name}</b> has <b>{selectedOption?.trade_status === "pending" ? "claimed to have deposited"
-                    : selectedOption?.trade_status === "rejected" ? "not deposited" : "deposited"} {selectedOption?.initial_investment}</b> in this token, {selectedOption?.trade_token}
+                    : selectedOption?.trade_status === "rejected" ? "not deposited" : "deposited"} {formatCurrency(selectedOption?.initial_investment)}</b> in this token, {selectedOption?.trade_token}
                     {" "}to this address, <b>{selectedOption?.trade_token_address}</b>. Please confirm and approve or reject to edit trade information.
                 </DialogDescription>
                 <div className="space-y-4">
@@ -117,10 +113,10 @@ const AdminManageCopyTradingModal: React.FC<AdminManageCopyTradingModalProps> = 
                         <Label>Trade Title</Label>
                         <Input value={selectedOption?.trade_title} readOnly className="bg-gray-100" />
                     </div>
-                    <div>
+                    {/* <div>
                         <Label>Trade</Label>
                         <Input value={selectedOption?.full_name} readOnly className="bg-gray-100" />
-                    </div>
+                    </div> */}
                     <div>
                         <Label>Initial Investment</Label>
                         <Input

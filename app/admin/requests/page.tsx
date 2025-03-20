@@ -18,11 +18,10 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { ArrowDownIcon, ArrowUpIcon, CheckIcon, XIcon } from "lucide-react";
-import { databases } from "@/lib/appwrite";
-import ENV from "@/constants/env";
-import { toast } from "sonner"
+import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { TableSkeleton } from "@/skeletons";
+import { fetchTransactions, updateTransactionStatus } from "@/app/actions/admin/transactions";
 
 export default function TransactionsPage() {
   interface Transaction {
@@ -41,83 +40,35 @@ export default function TransactionsPage() {
 
   // Fetch transactions from Appwrite database
   useEffect(() => {
-    const fetchTransactions = async () => {
+    const fetchData = async () => {
       setIsLoading(true);
       try {
-        const response = await databases.listDocuments(
-          ENV.databaseId,
-          ENV.collections.transactions
-        );
-
-        // Sort transactions by date (newest first)
-        const sortedTransactions = response.documents.sort(
-          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-        );
-
-        const transactions = sortedTransactions.map((doc) => ({
-          $id: doc.$id,
-          isWithdraw: doc.isWithdraw,
-          token_name: doc.token_name,
-          amount: doc.amount,
-          token_withdraw_address: doc.token_withdraw_address,
-          full_name: doc.full_name,
-          $createdAt: doc.$createdAt,
-          status: doc.status,
-        }));
-        setTransactions(transactions);
+        const data = await fetchTransactions();
+        setTransactions(data);
       } catch (error) {
         console.error("Error fetching transactions:", error);
-        toast("Error", {
-          description: "Failed to fetch transactions."
-        });
+        toast("Failed to fetch transactions.");
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchTransactions();
+    fetchData();
   }, []);
 
-  const handleApprove = async (id: string) => {
+  const handleUpdateStatus = async (id: string, status: "approved" | "rejected") => {
     try {
-      await databases.updateDocument(
-        ENV.databaseId,
-        ENV.collections.transactions,
-        id,
-        { status: "approved" }
-      );
+      await updateTransactionStatus(id, status);
       setTransactions((prev) =>
-        prev.map((t) => (t.$id === id ? { ...t, status: "approved" } : t))
+        prev.map((t) => (t.$id === id ? { ...t, status } : t))
       );
       toast("Success", {
-        description: "Transaction approved successfully.",
+        description: `Transaction ${status} successfully.`,
       });
     } catch (error) {
-      console.error("Error approving transaction:", error);
+      console.error(`Error ${status === "approved" ? "approving" : "rejecting"} transaction:`, error);
       toast("Error", {
-        description: "Failed to approve transaction.",
-      });
-    }
-  };
-
-  const handleReject = async (id: string) => {
-    try {
-      await databases.updateDocument(
-        ENV.databaseId,
-        ENV.collections.transactions,
-        id,
-        { status: "rejected" }
-      );
-      setTransactions((prev) =>
-        prev.map((t) => (t.$id === id ? { ...t, status: "rejected" } : t))
-      );
-      toast("Success", {
-        description: "Transaction rejected successfully.",
-      });
-    } catch (error) {
-      console.error("Error rejecting transaction:", error);
-      toast("Error", {
-        description: "Failed to reject transaction.",
+        description: `Failed to ${status === "approved" ? "approve" : "reject"} transaction.`,
       });
     }
   };
@@ -195,7 +146,7 @@ export default function TransactionsPage() {
                         <div className="flex space-x-2">
                           <Button
                             size="sm"
-                            onClick={() => handleApprove(transaction.$id)}
+                            onClick={() => handleUpdateStatus(transaction.$id, "approved")}
                           >
                             <CheckIcon className="mr-1 h-4 w-4" />
                             Approve
@@ -203,7 +154,7 @@ export default function TransactionsPage() {
                           <Button
                             size="sm"
                             variant="destructive"
-                            onClick={() => handleReject(transaction.$id)}
+                            onClick={() => handleUpdateStatus(transaction.$id, "rejected")}
                           >
                             <XIcon className="mr-1 h-4 w-4" />
                             Reject

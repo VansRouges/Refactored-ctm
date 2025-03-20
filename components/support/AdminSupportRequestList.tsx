@@ -9,15 +9,18 @@ import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { AdminSupportRequestDetails } from "./AdminSupportRequestDetails"
 import { TableSkeleton } from "@/skeletons"
 import { deleteSupportRequest } from "@/app/actions/support"
+import { toast } from "sonner"
 import { Trash } from "lucide-react"
 
 interface AdminSupportRequestListProps {
     requests: SupportRequest[]
     onStatusUpdate: (id: string, newStatus: string) => void
     isLoading?: boolean
+    setIsLoading: (value: boolean) => void
+    fetchRequests: () => Promise<void>
 }
 
-export function AdminSupportRequestList({ requests, onStatusUpdate, isLoading }: AdminSupportRequestListProps) {
+export function AdminSupportRequestList({ requests, onStatusUpdate, isLoading, setIsLoading, fetchRequests }: AdminSupportRequestListProps) {
     const [selectedRequest, setSelectedRequest] = useState<SupportRequest | null>(null)
     const isMobile = useMediaQuery("(max-width: 640px)")
 
@@ -30,12 +33,21 @@ export function AdminSupportRequestList({ requests, onStatusUpdate, isLoading }:
     }
 
     const handleDelete = async (id: string) => {
-        const isDeleted = await deleteSupportRequest(id);
-        if (isDeleted) {
+        try{
+            await deleteSupportRequest(id);
+            setIsLoading(true)
             console.log("Support request deleted successfully!");
+            toast("Deleted Successfully", 
+                { description: "support ticket deleted successfully"})
+            fetchRequests()
             // Optionally, refresh the list of support requests
-        } else {
-            console.error("Failed to delete support request.");
+        } catch(err){
+            const error = err as Error
+            console.error("Error deleting support request:", error.message);
+            toast("Error deleting support request", 
+                { description: `Error: ${error.message}`})
+        } finally{
+            setIsLoading(false)
         }
     };
     
