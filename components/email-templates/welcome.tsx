@@ -1,59 +1,82 @@
-type Params = {
-    name: string;
+import React from 'react';
+
+interface WelcomeTemplateProps {
+  data?: {
+    name?: string;
+    // Add other expected props here if needed
   };
-  
-  function Welcome({ name }: Params) {
-    return (
-      <div style={{ fontFamily: "Arial, sans-serif", color: "#333", textAlign: "center", padding: "20px" }}>
-        {/* Company Logo */}
-        <picture>
-            <img
-                src="https://copper-urgent-loon-814.mypinata.cloud/ipfs/bafkreiag2zhjruc22bm2zw5ome3htierrzwxwverz4eacfr3ysjliehuwi" // Replace with your actual image URL
-                alt="Crypto Platform Logo"
-                width="150"
-                style={{ marginBottom: "20px" }}
-            />
-        </picture>
-  
-        {/* Welcome Message */}
-        <h1>Welcome, {name}! 👋</h1>
-        <p style={{ fontSize: "16px", lineHeight: "1.5" }}>
-          We’re excited to have you on board! 🚀 Start exploring copy trading, buying stocks, and making smart investments today.
-        </p>
-  
-        {/* Hero Image */}
-        <picture>
-            <img
-                src="https://copper-urgent-loon-814.mypinata.cloud/ipfs/bafkreifk74sk4medn3mglmhzstrohkfwx67dephu63irvqo5hcjumsob2i" // Replace with a relevant image
-                alt="Crypto Trading"
-                width="100%"
-                style={{ maxWidth: "600px", margin: "20px auto", display: "block", borderRadius: "10px" }}
-            />
-        </picture>
-  
-        {/* Call to Action */}
-        <a
-          href="https://copytradingmarkets.com/dashboard"
-          style={{
-            display: "inline-block",
-            padding: "12px 24px",
-            backgroundColor: "#007bff",
-            color: "#fff",
-            textDecoration: "none",
-            borderRadius: "5px",
-            marginTop: "20px",
-          }}
-        >
-          Get Started
-        </a>
-  
-        {/* Footer */}
-        <p style={{ marginTop: "20px", fontSize: "12px", color: "#777" }}>
-          Need help? Contact our support team at <a href="mailto:support@yourcryptoplatform.com">support@yourcryptoplatform.com</a>
-        </p>
-      </div>
-    );
-  }
-  
-  export default Welcome;
-  
+}
+
+const WelcomeTemplate: React.FC<WelcomeTemplateProps> = ({ data = {} }) => {
+  return (
+    <div style={{ 
+      fontFamily: 'Arial, sans-serif', 
+      maxWidth: '600px', 
+      margin: '0 auto', 
+      padding: '20px',
+      color: '#333'
+    }}>
+      <h1 style={{ 
+        fontSize: '24px', 
+        marginBottom: '20px',
+        color: 'inherit'
+      }}>
+        Welcome to Our Platform!
+      </h1>
+      
+      <p style={{ 
+        color: '#555', 
+        lineHeight: '1.6',
+        margin: '0 0 16px 0'
+      }}>
+        Dear {data.name || 'Customer'},
+      </p>
+      
+      <p style={{ 
+        color: '#555', 
+        lineHeight: '1.6',
+        margin: '0 0 16px 0'
+      }}>
+        Thank you for joining our platform! We're excited to have you on board.
+      </p>
+      
+      <p style={{ 
+        color: '#555', 
+        lineHeight: '1.6',
+        margin: '0 0 16px 0'
+      }}>
+        Here are a few things you can do to get started:
+      </p>
+      
+      <ul style={{ 
+        color: '#555', 
+        lineHeight: '1.6', 
+        paddingLeft: '20px',
+        margin: '0 0 16px 0'
+      }}>
+        <li>Complete your profile</li>
+        <li>Explore our features</li>
+        <li>Connect with other users</li>
+      </ul>
+      
+      <p style={{ 
+        color: '#555', 
+        lineHeight: '1.6',
+        margin: '0 0 16px 0'
+      }}>
+        If you have any questions, feel free to reach out to our support team.
+      </p>
+      
+      <p style={{ 
+        color: '#555', 
+        lineHeight: '1.6', 
+        marginTop: '30px'
+      }}>
+        Best regards,<br />
+        The Team
+      </p>
+    </div>
+  );
+};
+
+export default WelcomeTemplate;

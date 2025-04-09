@@ -21,7 +21,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
-import { EmailForm, type EmailData } from "@/components/email-templates/EmailForm"
+import { EmailForm, type EmailData } from "@/components/email-components/EmailForm"
 import { Mail, FileText } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
@@ -56,7 +56,7 @@ export default function AdminEmailPage() {
     // Here you would typically send the email and update the pastEmails list
   }
 
-  const Content = <EmailForm onSubmit={handleSubmit} onCancel={() => setIsOpen(false)} />
+  const Content = <EmailForm onCancel={() => setIsOpen(false)} />
 
   console.log("emails", pastEmails)
 
@@ -93,7 +93,7 @@ export default function AdminEmailPage() {
                 Send Email
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-[85%]">
               <DialogHeader>
                 <DialogTitle>Compose Email</DialogTitle>
                 <DialogDescription>Fill out this form to send an email.</DialogDescription>
@@ -131,7 +131,7 @@ export default function AdminEmailPage() {
                 <TableBody>
                   {pastEmails.length > 0 ? (
                     pastEmails.map((email) => (
-                      <TableRow key={email.id}>
+                      <TableRow key={email?.id}>
                         <TableCell>{email.to}</TableCell>
                         <TableCell>{email.subject}</TableCell>
                         <TableCell>

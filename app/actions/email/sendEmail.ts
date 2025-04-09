@@ -1,32 +1,29 @@
-export const sendEmail = async ({
-    from,
-    to,
-    subject,
-    message,
-  }: {
-    from: string;
-    to: string;
-    subject: string;
-    message: string;
-  }) => {
-    try {
-      const response = await fetch("/api/email/send-email", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ from, to, subject, message }),
-      });
-  
-      const result = await response.json();
-      if (!response.ok) {
-        throw new Error(result.message || "Failed to send email");
-      }
-  
-      return result;
-    } catch (error) {
-      console.error("Error sending email:", error);
-      throw error;
-    }
-  };
-  
+'use server'
+
+export async function sendEmailWithTemplate({
+  from,
+  to,
+  subject,
+  templateId,
+  templateData
+}: {
+  from: string;
+  to: string;
+  subject: string;
+  templateId: string;
+  templateData: Record<string, any>;
+}) {
+  const res = await fetch("/api/email/send", {
+    method: "POST",
+    body: JSON.stringify({
+      from,
+      to,
+      subject,
+      templateId,
+      templateData,
+    }),
+    headers: { "Content-Type": "application/json" },
+  });
+
+  return await res.json();
+}
