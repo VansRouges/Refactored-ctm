@@ -18,29 +18,11 @@ import { Check, X } from "lucide-react";
 import { toast } from "sonner"
 import UpdateStockDialog from "./update-stock-dialog";
 import { TableSkeleton } from "@/skeletons";
+import type { AdminStock } from "@/types";
 
 const AdminPortfolioPage = () => {
-  interface Stock {
-    $id: string;
-    stock_status: string;
-    full_name: string;
-    stock_symbol: string;
-    stock_quantity: number;
-    stock_initial_value_pu: number;
-    stock_current_value: number;
-    stock_change: number;
-    isProfit: boolean;
-    stock_profit_loss: number;
-    isMinus: boolean;
-    stock_token: string;
-    stock_name: string;
-    stock_initial_value: number;
-    stock_value_entered: number;
-    stock_token_address: string;
-  }
-
-  const [stocks, setStocks] = useState<Stock[]>([]);
-  const [selectedStock, setSelectedStock] = useState<Stock | null>(null);
+  const [stocks, setStocks] = useState<AdminStock[]>([]);
+  const [selectedStock, setSelectedStock] = useState<AdminStock | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -51,7 +33,7 @@ const AdminPortfolioPage = () => {
           ENV.databaseId,
           ENV.collections.stockOptionsPurchases
         );
-        const stocksData: Stock[] = response.documents.map((doc) => ({
+        const stocksData: AdminStock[] = response.documents.map((doc) => ({
           $id: doc.$id,
           stock_status: doc.stock_status,
           full_name: doc.full_name,
@@ -88,8 +70,8 @@ const AdminPortfolioPage = () => {
         stockId,
         { stock_status: status }
       );
-      setStocks((prevStocks: Stock[]) =>
-        prevStocks.map((stock: Stock) =>
+      setStocks((prevStocks: AdminStock[]) =>
+        prevStocks.map((stock: AdminStock) =>
           stock.$id === stockId ? { ...stock, stock_status: status } : stock
         )
       );
@@ -104,7 +86,7 @@ const AdminPortfolioPage = () => {
     }
   };
 
-  const handleUpdateStock = async (updatedStock: Stock) => {
+  const handleUpdateStock = async (updatedStock: AdminStock) => {
     setIsLoading(true);
     console.log("Updated Stock Payload:", updatedStock);
 
@@ -159,8 +141,8 @@ const AdminPortfolioPage = () => {
           isMinus,
         }
       );
-      setStocks((prevStocks: Stock[]) =>
-        prevStocks.map((stock: Stock) =>
+      setStocks((prevStocks: AdminStock[]) =>
+        prevStocks.map((stock: AdminStock) =>
           stock.$id === updatedStock.$id ? updatedStock : stock
         )
       );

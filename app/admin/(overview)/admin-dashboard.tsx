@@ -20,6 +20,7 @@ import ENV from "@/constants/env";
 import User from "./user-details";
 import type { Transaction } from "@/types";
 import { TableSkeleton } from "@/skeletons";
+import { fetchAllUsers } from '@/app/actions/admin/users';
 
 interface User {
   id: string;

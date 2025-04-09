@@ -101,3 +101,22 @@ export interface Testimonial {
     change: number;
     isMinus: boolean;
   }
+
+  export interface AdminStock {
+    $id: string;
+    stock_status: string;
+    full_name: string;
+    stock_symbol: string;
+    stock_quantity: number;
+    stock_initial_value_pu: number;
+    stock_current_value: number;
+    stock_change: number;
+    isProfit: boolean;
+    stock_profit_loss: number;
+    isMinus: boolean;
+    stock_token: string;
+    stock_name: string;
+    stock_initial_value: number;
+    stock_value_entered: number;
+    stock_token_address: string;
+  }

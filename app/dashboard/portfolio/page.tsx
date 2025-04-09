@@ -22,7 +22,13 @@ export default function AdminDashboard() {
     <div className="container mx-auto p-6">
       <h1 className="text-xl md:text-3xl font-bold mb-6">Manage Options</h1>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 p-2">
+        <TabsList className="grid w-full grid-cols-3 p-2">
+          <TabsTrigger
+            className="overflow-hidden p-1 text-xs sm:text-base"
+            value="crypto"
+          >
+            Crypto
+          </TabsTrigger>
           <TabsTrigger
             className="overflow-hidden p-1 text-xs sm:text-base"
             value="stocks"
@@ -38,6 +44,11 @@ export default function AdminDashboard() {
         </TabsList>
         <TabsContent value="stocks" className="mt-6">
           <StockPage />
+        </TabsContent>
+        <TabsContent value="crypto" className="mt-6">
+          <div>
+            <p>Coming Soon</p>
+          </div>
         </TabsContent>
         <TabsContent value="copy-trades" className="mt-6">
           <CopyTradingPage />

@@ -293,8 +293,8 @@ const UserDetails: React.FC<UserDetailsProps> = ({
       </Card>
 
       <UserPortfolioCard
-          user={user}
-          handleFieldChange={handleFieldChange}
+        user={user}
+        handleFieldChange={handleFieldChange}
       />
 
       <UserTransactionTable

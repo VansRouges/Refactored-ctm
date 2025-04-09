@@ -9,8 +9,8 @@ export async function fetchEmails() {
       });
   
       const data = await response.json();
+      console.log("server emails: ", data.emails)
       return data.emails || [];
-      console.log("emails", data.emails)
     } catch (error) {
       console.error("Error fetching emails:", error);
       return [];
