@@ -1,38 +1,31 @@
-import React from "react";
-import WelcomeTemplate from "@/components/email-templates/welcome";
-import SupportResponseTemplate from "@/components/email-templates/SupportResponseTemplate";
-import PaymentConfirmationTemplate from "@/components/email-templates/PaymentConfirmationTemplate";
-
-
 export interface EmailTemplate {
   id: string;
   name: string;
   subject: string;
-  category: "welcome" | "notification" | "marketing" | "support";
-  component: React.ComponentType<{ data?: any }>;
+  body: string;
+  category: "welcome" | "notification" | "support"
+  requiredFields: string[]
 }
-
 
 export const emailTemplates: EmailTemplate[] = [
   {
     id: "template-1",
     name: "Welcome Email",
-    subject: "Welcome to Our Platform!",
+    subject: "Welcome to the New & Improved CopyTradingMarkets!",
+    body: `Dear {{name}},
+
+      Thank you for joining our platform! We're excited to have you on board.
+
+      Here are a few things you can do to get started:
+      - Complete your profile
+      - Explore our features
+      - Connect with other users
+
+      If you have any questions, feel free to reach out to our support team.
+
+      Best regards,
+      The Team`,
     category: "welcome",
-    component: WelcomeTemplate
+    requiredFields: ["name"],
   },
-  {
-    id: "template-2",
-    name: "Payment Confirmation",
-    subject: "Payment Confirmation - Invoice #{{invoiceNumber}}",
-    category: "notification",
-    component: PaymentConfirmationTemplate
-  },
-  {
-    id: "template-3",
-    name: "Support Ticket Response",
-    subject: "Re: Support Ticket #{{ticketNumber}}",
-    category: "support",
-    component: SupportResponseTemplate
-  },
-];
+]

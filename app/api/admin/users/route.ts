@@ -16,20 +16,44 @@ export async function GET() {
 
     const users = await response.json();
 
-    const formattedUsers = Array.isArray(users)
-      ? users.map(user => ({
-          id: user.id,
-          username: user?.username,
-          imageUrl: user?.image_url,
-          firstName: user.first_name,
-          lastName: user.last_name,
-          emailAddresses: user.email_addresses?.map(email => email.email_address),
-          createdAt: new Date(user.created_at).toLocaleDateString(),
-          lastSignInAt: user.last_sign_in_at
-            ? new Date(user.last_sign_in_at).toLocaleDateString()
-            : 'Never',
-          publicMetadata: user.public_metadata,
-        }))
+    interface User {
+      id: string;
+      username?: string;
+      image_url?: string;
+      first_name: string;
+      last_name: string;
+      email_addresses?: { email_address: string }[];
+      created_at: string;
+      last_sign_in_at?: string;
+      public_metadata?: Record<string, unknown>;
+    }
+
+    interface FormattedUser {
+      id: string;
+      username?: string;
+      imageUrl?: string;
+      firstName: string;
+      lastName: string;
+      emailAddresses?: string[];
+      createdAt: string;
+      lastSignInAt: string;
+      publicMetadata?: Record<string, unknown>;
+    }
+
+    const formattedUsers: FormattedUser[] = Array.isArray(users)
+      ? users.map((user: User) => ({
+        id: user.id,
+        username: user?.username,
+        imageUrl: user?.image_url,
+        firstName: user.first_name,
+        lastName: user.last_name,
+        emailAddresses: user.email_addresses?.map(email => email.email_address),
+        createdAt: new Date(user.created_at).toLocaleDateString(),
+        lastSignInAt: user.last_sign_in_at
+        ? new Date(user.last_sign_in_at).toLocaleDateString()
+        : 'Never',
+        publicMetadata: user.public_metadata,
+      }))
       : [];
 
     return NextResponse.json({

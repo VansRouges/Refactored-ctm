@@ -45,8 +45,8 @@ const AdminCopyTradingPage = () => {
     setCopyTradingOptions(
       [...copyTradingOptions].sort(
         (a: CopyTradingOption, b: CopyTradingOption) => {
-          if (a[key] < b[key]) return direction === "asc" ? -1 : 1;
-          if (a[key] > b[key]) return direction === "asc" ? 1 : -1;
+          if ((a[key] ?? 0) < (b[key] ?? 0)) return direction === "asc" ? -1 : 1;
+          if ((a[key] ?? 0) > (b[key] ?? 0)) return direction === "asc" ? 1 : -1;
           return 0;
         }
       )

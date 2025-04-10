@@ -1,20 +1,22 @@
 "use client"
-
 import { useState, useEffect } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "sonner"
 import { fetchAllUsers } from '@/app/actions/admin/users';
+import { formatCurrency } from "@/lib/utils"
+import type { User, SelectedUser } from "@/types"
+
 
 export default function Home() {
-  const [selectedUser, setSelectedUser] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [users, setUsers] = useState([])
-  const [usersLoading, setUsersLoading] = useState(true)
+  const [selectedUser, setSelectedUser] = useState<SelectedUser | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [users, setUsers] = useState<User[]>([]);
 
   useEffect(() => {
     const loadUsers = async () => {
+      setLoading(true)
       try {
         const { data } = await fetchAllUsers()
         setUsers(data)
@@ -22,21 +24,21 @@ export default function Home() {
         console.error('Error loading users:', error)
         toast.error('Failed to load users')
       } finally {
-        setUsersLoading(false)
+        setLoading(false)
       }
     }
     loadUsers()
   }, [])
 
-  const handleUserClick = (user) => {
+  const handleUserClick = (user: User): void => {
     setLoading(true)
     setTimeout(() => {
-      setSelectedUser({
+      const selectedUserData: SelectedUser = {
         id: user.id,
         username: user.username,
         imageUrl: user.imageUrl,
-        name: `${user.firstName} ${user.lastName}`,
         email: user.emailAddresses[0],
+        name: `${user.firstName} ${user.lastName}`,
         role: user.publicMetadata?.role || 'User',
         currentValue: user.publicMetadata?.currentValue || 0,
         totalInvestment: user.publicMetadata?.totalInvestment || 0,
@@ -45,51 +47,35 @@ export default function Home() {
         kycStatus: user.publicMetadata?.kycStatus,
         lastSeen: user?.lastSignInAt,
         joinDate: user.createdAt,
-      })
+      }
+      setSelectedUser(selectedUserData) 
       setLoading(false)
     }, 500)
   }
 
-  const handleContactClick = (email) => {
-    toast("Contact initiated", { 
-      description: `Email sent to ${email}`,
-    })
-  }
 
   return (
-    <main className="mx- py- px-4 md:px-6 h-[calc(100vh-4rem)] overflow-y-auto">
-      <h1 className="text-3xl font-bold mb-6 sticky top-0 bg-background z-10 py-2">User Directory</h1>
+    <main className="container mx-auto py-6 px-4 md:px-6 h-[calc(100vh-10rem)] overflow-y-auto">
+      <h1 className="text-3xl font-bold mb-6">User Directory</h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-[calc(100%-3.5rem)]">
-        <div className="md:col-span-1 h-full">
-          <Card className="h-full">
-            <CardHeader className="sticky top-0 bg-background z-10">
-              <CardTitle>Users ({users.length})</CardTitle>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* 1st grid */}
+        <div className="md:col-span-1">
+          <Card>
+            <CardHeader>
+              <CardTitle>Users</CardTitle>
               <CardDescription>Select a user to view details</CardDescription>
             </CardHeader>
-            <CardContent className="h-[500px] overflow-y-auto">
-              {usersLoading ? (
-                <div className="space-y-4">
-                  {[...Array(6)].map((_, i) => (
-                    <div key={i} className="flex items-center gap-4 p-3">
-                      <Skeleton className="h-10 w-10 rounded-full" />
-                      <div className="space-y-2">
-                        <Skeleton className="h-4 w-32" />
-                        <Skeleton className="h-3 w-24" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {users.map((user) => (
-                    <div
-                      key={user.id}
-                      className={`flex items-center gap-4 p-3 rounded-lg cursor-pointer transition-colors ${
-                        selectedUser?.id === user.id ? "bg-primary/10" : "hover:bg-muted"
-                      }`}
-                      onClick={() => handleUserClick(user)}
-                    >
+            <CardContent>
+              <div className="space-y-4">
+                {users.map((user) => (
+                  <div
+                    key={user.id}
+                    className={`flex items-center gap-4 p-3 rounded-lg cursor-pointer transition-colors ${
+                      selectedUser?.id === user.id ? "bg-primary/10" : "hover:bg-muted"
+                    }`}
+                    onClick={() => handleUserClick(user)}
+                  >
                       <Avatar>
                         <AvatarImage src={user.imageUrl} alt={`${user?.firstName} ${user?.lastName}`} />
                         <AvatarFallback>
@@ -104,34 +90,36 @@ export default function Home() {
                           {user.publicMetadata?.role || 'User'}
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
         </div>
-
-        <div className="md:col-span-2 h-full">
-          {loading ? (
-            <UserDetailSkeleton />
-          ) : selectedUser ? (
-            <UserDetail user={selectedUser} onContactClick={handleContactClick} />
-          ) : (
-            <div className="flex items-center justify-center h-full min-h-[300px] rounded-lg border border-dashed">
-              <div className="text-center">
-                <h3 className="text-lg font-medium">No user selected</h3>
-                <p className="text-sm text-muted-foreground mt-1">Select a user from the list to view their details</p>
+        
+        {/* 2nd grid */}
+        <div className="md:col-span-2">
+          <div className="sticky top-1">
+            {loading ? (
+              <UserDetailSkeleton />
+            ) : selectedUser ? (
+              <UserDetail user={selectedUser} />
+            ) : (
+              <div className="flex items-center justify-center h-full min-h-[300px] rounded-lg border border-dashed">
+                <div className="text-center">
+                  <h3 className="text-lg font-medium">No user selected</h3>
+                  <p className="text-sm text-muted-foreground mt-1">Select a user from the list to view their details</p>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </main>
   )
 }
 
-function UserDetail({ user, onContactClick }) {
+function UserDetail({ user }: { user: SelectedUser }) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center gap-4">
@@ -157,7 +145,7 @@ function UserDetail({ user, onContactClick }) {
                 <span className="text-sm text-muted-foreground">Email</span>
                 <button
                   className="text-sm font-medium text-left hover:underline"
-                  onClick={() => onContactClick(user.email)}
+                  // onClick={() => onContactClick(user.email)}
                 >
                   {user.email}
                 </button>
@@ -189,16 +177,16 @@ function UserDetail({ user, onContactClick }) {
               <div className="flex flex-col">
                 <span className="text-sm text-muted-foreground">ROI</span>
                 <span className={`text-sm font-medium ${user.roi < 10 ? "text-red-500" : "text-green-500"}`}>
-                  {user.roi}
+                  {user.roi}%
                 </span>
               </div>
               <div className="flex flex-col">
                 <span className="text-sm text-muted-foreground">Current Value</span>
-                <span className="text-sm font-medium">{user.currentValue}</span>
+                <span className="text-sm font-medium">{formatCurrency(user.currentValue)}</span>
               </div>
               <div className="flex flex-col">
                 <span className="text-sm text-muted-foreground">Total Investment</span>
-                <span className="text-sm font-medium">{user.totalInvestment}</span>
+                <span className="text-sm font-medium">{formatCurrency(user.totalInvestment)}</span>
               </div>
             </div>
           </div>

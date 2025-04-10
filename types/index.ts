@@ -2,14 +2,16 @@ export interface CopyTradingOption {
   $id: string;
   trade_title: string;
   trade_token: string;
+  full_name?: string;
+  trade_token_address?: string;
   initial_investment: number;
   trade_current_value: number;
   isProfit: boolean;
   trade_profit_loss: number;
   trade_win_rate: number;
   trade_risk: string;
-  copiedSince: string;
-  $createdAt: string;
+  copiedSince?: string;
+  $createdAt?: string;
   trade_status: string;
 }
 
@@ -29,29 +31,40 @@ export interface Testimonial {
     isMinus: boolean;
   }
   
-  export interface User {
-    id: string;
-    user_name: string;
-    user_id: string;
-    isAdmin: boolean;
-    full_name: string;
-    email_address: string;
-    status: boolean;
-    lastSeen: string;
-    registeredDate: string;
-    roi: number;
-    current_value: number;
-    total_investment: number;
-    transactions?: {
-      id: string;
-      type: string;
-      amount: number;
-      currency: string;
-      status: string;
-      date: string;
-    }[];
-  }
-  
+export interface User {
+  id: string;
+  username: string;
+  imageUrl: string;
+  firstName: string;
+  lastName: string;
+  emailAddresses: string[];
+  publicMetadata?: {
+    role?: string;
+    currentValue?: number;
+    totalInvestment?: number;
+    roi?: number;
+    accountStatus?: boolean;
+    kycStatus?: boolean;
+  };
+  lastSignInAt?: string;
+  createdAt: string;
+}
+export interface SelectedUser {
+  id: string;
+  username: string;
+  imageUrl: string;
+  name: string;
+  email: string;
+  role: string;
+  currentValue: number;
+  totalInvestment: number;
+  roi: number;
+  accountStatus?: boolean;
+  kycStatus?: boolean;
+  lastSeen?: string;
+  joinDate: string;
+}
+
   export interface Transaction {
     id: string;
     type: string;

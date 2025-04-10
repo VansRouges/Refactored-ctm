@@ -49,7 +49,7 @@ export async function fetchCopyTradingData() {
     }
   }
 
-  export async function updateTrade(id: string, updatedFields: any) {
+  export async function updateTrade(id: string, updatedFields: Record<string, unknown>) {
     try {
       const response = await fetch("/api/admin/copytrade/update", {
         method: "PUT",

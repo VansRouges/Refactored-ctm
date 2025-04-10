@@ -6,7 +6,30 @@ import { databases } from "@/lib/appwrite";
 import { Pencil } from "lucide-react";
 import { toast } from "sonner"
 import ENV from "@/constants/env"; // Appwrite database instance
-import type { User } from "@/types";
+// import type { User } from "@/types";
+
+export interface User {
+    id: string;
+    user_name: string;
+    user_id: string;
+    isAdmin: boolean;
+    full_name: string;
+    email_address: string;
+    status: boolean;
+    lastSeen: string;
+    registeredDate: string;
+    roi: number;
+    current_value: number;
+    total_investment: number;
+    transactions?: {
+      id: string;
+      type: string;
+      amount: number;
+      currency: string;
+      status: string;
+      date: string;
+    }[];
+  }
 
 
 interface UserPortfolioCardProps {

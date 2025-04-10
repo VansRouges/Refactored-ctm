@@ -25,8 +25,23 @@ import { formatCurrency } from "@/lib/utils";
 interface AdminManageCopyTradingModalProps {
     isOpen: boolean;
     onClose: () => void;
-    selectedOption: any; // Replace 'any' with a more specific type if possible
-    setSelectedOption: (option: any) => void; // Replace 'any' with a more specific type if possible
+    selectedOption: {
+        trade_status: string;
+        trade_current_value: number;
+        trade_profit_loss: number;
+        trade_win_rate: number;
+        isProfit: boolean;
+        $id: string;
+        full_name?: string;
+        initial_investment: number;
+        trade_title: string;
+        trade_token: string;
+        trade_token_address?: string;
+        copiedSince?: string;
+        $createdAt?: string;
+        trade_risk: string;
+    };
+    setSelectedOption: (option: AdminManageCopyTradingModalProps['selectedOption']) => void;
     isLoading: boolean;
     setIsLoading: (loading: boolean) => void;
 }
@@ -38,9 +53,9 @@ const AdminManageCopyTradingModal: React.FC<AdminManageCopyTradingModalProps> = 
     const handleSave = async () => { 
         setIsLoading(true);
     
-        const validTradeCurrentValue = parseFloat(selectedOption?.trade_current_value);
-        const validTradeProfitLoss = parseFloat(selectedOption?.trade_profit_loss);
-        const validTradeWinRate = parseFloat(selectedOption?.trade_win_rate);
+        const validTradeCurrentValue = parseFloat(selectedOption?.trade_current_value.toString());
+        const validTradeProfitLoss = parseFloat(selectedOption?.trade_profit_loss.toString());
+        const validTradeWinRate = parseFloat(selectedOption?.trade_win_rate.toString());
     
         if (isNaN(validTradeCurrentValue)) {
           console.error("Invalid trade_current_value:", selectedOption?.trade_current_value);
@@ -128,11 +143,11 @@ const AdminManageCopyTradingModal: React.FC<AdminManageCopyTradingModalProps> = 
                     <div>
                         <Label>Current Value</Label>
                         <Input
-                            value={selectedOption?.trade_current_value || ""}
+                            value={selectedOption?.trade_current_value || 0}
                             onChange={(e) =>
                                 setSelectedOption({
                                     ...selectedOption,
-                                    trade_current_value: e.target.value,
+                                    trade_current_value: parseFloat(e.target.value) || 0,
                                 })
                             }
                             type="number"
@@ -145,7 +160,7 @@ const AdminManageCopyTradingModal: React.FC<AdminManageCopyTradingModalProps> = 
                             onChange={(e) =>
                                 setSelectedOption({
                                     ...selectedOption,
-                                    trade_profit_loss: e.target.value,
+                                    trade_profit_loss: parseFloat(e.target.value) || 0,
                                 })
                             }
                         />
@@ -185,7 +200,7 @@ const AdminManageCopyTradingModal: React.FC<AdminManageCopyTradingModalProps> = 
                             onChange={(e) =>
                                 setSelectedOption({
                                     ...selectedOption,
-                                    trade_win_rate: e.target.value,
+                                    trade_win_rate: parseFloat(e.target.value) || 0,
                                 })
                             }
                         />

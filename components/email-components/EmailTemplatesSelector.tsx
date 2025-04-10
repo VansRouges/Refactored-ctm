@@ -61,8 +61,8 @@ export function EmailTemplateSelector({ onSelectTemplate }: EmailTemplateSelecto
                           <CardTitle>{template.name}</CardTitle>
                           <CardDescription>Subject: {template.subject}</CardDescription>
                         </CardHeader>
-                        <CardContent className="text-sm text-muted-foreground">
-                          <template.component data={{ name: "John Doe", invoiceNumber: "12345", ticketNumber: "ABC-789" }} />
+                        <CardContent>
+                          <p className="text-sm whitespace-pre-line line-clamp-3">{template.body}</p>
                         </CardContent>
                         <CardFooter>
                           <Button onClick={() => handleSelectTemplate(template)}>Use Template</Button>
@@ -78,4 +78,3 @@ export function EmailTemplateSelector({ onSelectTemplate }: EmailTemplateSelecto
     </Dialog>
   )
 }
-
