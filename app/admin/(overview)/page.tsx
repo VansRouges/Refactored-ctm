@@ -2,31 +2,43 @@
 import { useState, useEffect } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "sonner"
 import { fetchAllUsers } from '@/app/actions/admin/users';
-import { formatCurrency } from "@/lib/utils"
 import type { User, SelectedUser } from "@/types"
-
+import { 
+  UserDetail, 
+  UserDetailSkeleton,
+  UpdateUserModal,
+} from "@/components/admin-overview"
+import { updateUserMetadata } from "@/app/actions/role"
 
 export default function Home() {
   const [selectedUser, setSelectedUser] = useState<SelectedUser | null>(null);
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false)
+  const [formData, setFormData] = useState({
+    roi: 0,
+    currentValue: 0,
+    totalInvestment: 0,
+    kycStatus: false,
+    accountStatus: false,
+  })
+
+  const loadUsers = async () => {
+    setLoading(true)
+    try {
+      const { data } = await fetchAllUsers()
+      setUsers(data)
+    } catch (error) {
+      console.error('Error loading users:', error)
+      toast.error('Failed to load users')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
-    const loadUsers = async () => {
-      setLoading(true)
-      try {
-        const { data } = await fetchAllUsers()
-        setUsers(data)
-      } catch (error) {
-        console.error('Error loading users:', error)
-        toast.error('Failed to load users')
-      } finally {
-        setLoading(false)
-      }
-    }
     loadUsers()
   }, [])
 
@@ -52,6 +64,51 @@ export default function Home() {
       setLoading(false)
     }, 500)
   }
+
+  const openUpdateModal = () => {
+    if (selectedUser) {
+      setFormData({
+        roi: selectedUser.roi,
+        currentValue: selectedUser.currentValue,
+        totalInvestment: selectedUser.totalInvestment,
+        kycStatus: selectedUser.kycStatus,
+        accountStatus: selectedUser.accountStatus,
+      })
+      setIsUpdateModalOpen(true)
+    }
+  }
+
+
+const handleUpdateUser = async () => {
+  if (!selectedUser) return
+
+  try {
+    // 1. Update metadata on Clerk
+    await updateUserMetadata({
+      userId: selectedUser.id,
+      metadata: {
+        roi: formData.roi,
+        currentValue: formData.currentValue,
+        totalInvestment: formData.totalInvestment,
+        kycStatus: formData.kycStatus,
+        accountStatus: formData.accountStatus,
+      },
+    })
+
+    setIsUpdateModalOpen(false)
+
+    toast("User updated", {
+      description: `${selectedUser.name}'s profile has been updated.`,
+    })
+  } catch (error) {
+    console.error("Failed to update user metadata:", error)
+    toast("Update failed", {
+      description: "Something went wrong while updating the user."
+    })
+  } finally{
+    await loadUsers()
+  }
+}
 
 
   return (
@@ -103,7 +160,7 @@ export default function Home() {
             {loading ? (
               <UserDetailSkeleton />
             ) : selectedUser ? (
-              <UserDetail user={selectedUser} />
+              <UserDetail user={selectedUser} onUpdateClick={openUpdateModal} />
             ) : (
               <div className="flex items-center justify-center h-full min-h-[300px] rounded-lg border border-dashed">
                 <div className="text-center">
@@ -115,146 +172,17 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {/* Update User Modal */}
+      <UpdateUserModal
+        loading={loading}
+        open={isUpdateModalOpen}
+        onOpenChange={setIsUpdateModalOpen}
+        selectedUser={selectedUser}
+        formData={formData}
+        setFormData={setFormData}
+        handleUpdateUser={handleUpdateUser}
+      />
     </main>
-  )
-}
-
-function UserDetail({ user }: { user: SelectedUser }) {
-  return (
-    <Card>
-      <CardHeader className="flex flex-row items-center gap-4">
-        <Avatar className="h-16 w-16">
-          <AvatarImage src={user?.imageUrl} alt={`${user?.name}` || "no full name"} />
-          <AvatarFallback>{user?.name || "noName"}</AvatarFallback>
-        </Avatar>
-        <div>
-          <CardTitle>{user.name ?? "No full name yet"}</CardTitle>
-          <CardDescription>Role: {user.role}</CardDescription>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="grid gap-6">
-          <div className="grid gap-3">
-            <div className="text-sm font-bold">User Information</div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex flex-col">
-                <span className="text-sm text-muted-foreground">Username</span>
-                <span className="text-sm font-medium">{user.username}</span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-sm text-muted-foreground">Email</span>
-                <button
-                  className="text-sm font-medium text-left hover:underline"
-                  // onClick={() => onContactClick(user.email)}
-                >
-                  {user.email}
-                </button>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-sm text-muted-foreground">Last Seen:</span>
-                <span className="text-sm font-medium">{user.lastSeen}</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid gap-3">
-            <div className="text-sm font-bold">Account Status</div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex items-center gap-2">
-                <div className={`w-3 h-3 rounded-full ${user.kycStatus ? "bg-green-500" : "bg-red-500"}`}></div>
-                <span className="text-sm">KYC Status: {user.kycStatus ? "Verified" : "Not Verified"}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className={`w-3 h-3 rounded-full ${user.accountStatus ? "bg-green-500" : "bg-red-500"}`}></div>
-                <span className="text-sm">Account Status: {user.accountStatus ? "Active" : "Inactive"}</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid gap-3">
-            <div className="text-sm font-bold">User Portfolio</div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="flex flex-col">
-                <span className="text-sm text-muted-foreground">ROI</span>
-                <span className={`text-sm font-medium ${user.roi < 10 ? "text-red-500" : "text-green-500"}`}>
-                  {user.roi}%
-                </span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-sm text-muted-foreground">Current Value</span>
-                <span className="text-sm font-medium">{formatCurrency(user.currentValue)}</span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-sm text-muted-foreground">Total Investment</span>
-                <span className="text-sm font-medium">{formatCurrency(user.totalInvestment)}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
-
-function UserDetailSkeleton() {
-  return (
-    <Card>
-      <CardHeader className="flex flex-row items-center gap-4">
-        <Skeleton className="h-16 w-16 rounded-full" />
-        <div className="space-y-2">
-          <Skeleton className="h-5 w-40" />
-          <Skeleton className="h-4 w-32" />
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="grid gap-6">
-          <div className="grid gap-3">
-            <Skeleton className="h-4 w-32" />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Skeleton className="h-3 w-16" />
-                <Skeleton className="h-4 w-40" />
-              </div>
-              <div className="space-y-2">
-                <Skeleton className="h-3 w-16" />
-                <Skeleton className="h-4 w-32" />
-              </div>
-            </div>
-          </div>
-
-          <div className="grid gap-3">
-            <Skeleton className="h-4 w-16" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-full" />
-          </div>
-
-          <div className="grid gap-3">
-            <Skeleton className="h-4 w-24" />
-            <div className="flex items-center gap-2">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-4 w-32" />
-            </div>
-          </div>
-
-          <div className="grid gap-3">
-            <Skeleton className="h-4 w-20" />
-            <div className="flex flex-wrap gap-2">
-              {[1, 2, 3].map((i) => (
-                <Skeleton key={i} className="h-6 w-24 rounded-full" />
-              ))}
-            </div>
-          </div>
-
-          <div className="grid gap-3">
-            <Skeleton className="h-4 w-16" />
-            <div className="flex flex-wrap gap-2">
-              {[1, 2, 3, 4].map((i) => (
-                <Skeleton key={i} className="h-6 w-20 rounded-full" />
-              ))}
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
   )
 }

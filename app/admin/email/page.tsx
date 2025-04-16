@@ -54,28 +54,32 @@ export default function AdminEmailPage() {
               </div>
             ) : 
             (
-              <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>To</TableHead>
-                  <TableHead>Subject</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Sent At</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {pastEmails.map((email) => (
-                  <TableRow key={email.$id}>
-                    <TableCell>{email.to}</TableCell>
-                    <TableCell>{email.subject}</TableCell>
-                    <TableCell>
-                      <Badge variant={email.status === "received" ? "default" : "destructive"}>{email.status}</Badge>
-                    </TableCell>
-                    <TableCell>{new Date(email.$createdAt).toLocaleString()}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+              <div className="overflow-y-auto max-h-[400px]">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>To</TableHead>
+                      <TableHead>Subject</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Sent At</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {pastEmails.map((email) => (
+                      <TableRow key={email.$id}>
+                        <TableCell>{email.to}</TableCell>
+                        <TableCell>{email.subject}</TableCell>
+                        <TableCell>
+                          <Badge variant={email.status === "received" ? "default" : "destructive"}>
+                            {email.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{new Date(email.$createdAt).toLocaleString()}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             )}
           </div>
         </TabsContent>

@@ -9,7 +9,7 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("copy-trades");
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto px-6 ">
       <h1 className="text-xl md:text-3xl font-bold mb-6">Manage Options</h1>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2 p-2">

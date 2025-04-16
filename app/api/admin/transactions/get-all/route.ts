@@ -5,6 +5,9 @@ import ENV from "@/constants/env";
 const databaseId = ENV.databaseId;
 const collectionId = ENV.collections.transactions;
 
+// NOTE:
+// YOU NEED A PAGINATED FUNCTIONALITY TO FETCH ALL TRANSACTIONS
+
 export async function GET() {
   try {
     // Fetch transactions from Appwrite

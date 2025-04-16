@@ -174,92 +174,94 @@ const AdminPortfolioPage = () => {
             {isLoading ? (
               <TableSkeleton />
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Stock</TableHead>
-                    <TableHead>Quantity</TableHead>
-                    <TableHead>Ini. Val.(pu)</TableHead>
-                    <TableHead>Cur. Val.(pu)</TableHead>
-                    <TableHead>Total Val.</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {stocks.map((stock) => (
-                    <TableRow key={stock.$id}>
-                      <TableCell>{stock.full_name}</TableCell>
-                      <TableCell>{stock.stock_symbol}</TableCell>
-                      <TableCell>{stock.stock_quantity}</TableCell>
-                      <TableCell>
-                        ${Number(stock?.stock_initial_value_pu || 0).toFixed(2)}
-                      </TableCell>
-                      <TableCell>
-                        ${Number(stock?.stock_current_value || 0).toFixed(2)}
-                      </TableCell>
-                      <TableCell>
-                        $
-                        {(
-                          Number(stock?.stock_quantity || 0) *
-                          Number(stock?.stock_current_value || 0)
-                        ).toFixed(2)}
-                      </TableCell>
-                      <TableCell>
-                        {stock.stock_status === "rejected" ? (
-                          <span className="badge bg-red-500 rounded-xl p-2 text-white">
-                            Rejected
-                          </span>
-                        ) : stock.stock_status === "pending" ? (
-                          <span className="badge bg-yellow-500 rounded-xl p-2 text-white">
-                            Pending
-                          </span>
-                        ) : (
-                          <span className="badge bg-green-500 rounded-xl p-2 text-white">
-                            Approved
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell className="flex items-center space-x-2">
-                        {stock.stock_status === "pending" && (
-                          <>
-                            <Button
-                              onClick={() =>
-                                updateStockStatus(stock.$id, "approved")
-                              }
-                              className="text-white bg-green-500 hover:bg-green-800"
-                            >
-                              <Check className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              onClick={() => {
-                                if (
-                                  confirm(
-                                    "Are you sure you want to reject this stock?"
-                                  )
-                                ) {
-                                  updateStockStatus(stock.$id, "rejected");
-                                }
-                              }}
-                              className="text-white bg-red-500 hover:bg-red-800"
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </>
-                        )}
-                        <UpdateStockDialog
-                          stock={stock}
-                          selectedStock={selectedStock}
-                          loading={isLoading}
-                          setSelectedStock={setSelectedStock}
-                          handleUpdateStock={handleUpdateStock}
-                        />
-                      </TableCell>
+              <div className="overflow-y-auto max-h-[370px]">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Stock</TableHead>
+                      <TableHead>Quantity</TableHead>
+                      <TableHead>Ini. Val.(pu)</TableHead>
+                      <TableHead>Cur. Val.(pu)</TableHead>
+                      <TableHead>Total Val.</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {stocks.map((stock) => (
+                      <TableRow key={stock.$id}>
+                        <TableCell>{stock.full_name}</TableCell>
+                        <TableCell>{stock.stock_symbol}</TableCell>
+                        <TableCell>{stock.stock_quantity}</TableCell>
+                        <TableCell>
+                          ${Number(stock?.stock_initial_value_pu || 0).toFixed(2)}
+                        </TableCell>
+                        <TableCell>
+                          ${Number(stock?.stock_current_value || 0).toFixed(2)}
+                        </TableCell>
+                        <TableCell>
+                          $
+                          {(
+                            Number(stock?.stock_quantity || 0) *
+                            Number(stock?.stock_current_value || 0)
+                          ).toFixed(2)}
+                        </TableCell>
+                        <TableCell>
+                          {stock.stock_status === "rejected" ? (
+                            <span className="badge bg-red-500 rounded-xl p-2 text-white">
+                              Rejected
+                            </span>
+                          ) : stock.stock_status === "pending" ? (
+                            <span className="badge bg-yellow-500 rounded-xl p-2 text-white">
+                              Pending
+                            </span>
+                          ) : (
+                            <span className="badge bg-green-500 rounded-xl p-2 text-white">
+                              Approved
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell className="flex items-center space-x-2">
+                          {stock.stock_status === "pending" && (
+                            <>
+                              <Button
+                                onClick={() =>
+                                  updateStockStatus(stock.$id, "approved")
+                                }
+                                className="text-white bg-green-500 hover:bg-green-800"
+                              >
+                                <Check className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                onClick={() => {
+                                  if (
+                                    confirm(
+                                      "Are you sure you want to reject this stock?"
+                                    )
+                                  ) {
+                                    updateStockStatus(stock.$id, "rejected");
+                                  }
+                                }}
+                                className="text-white bg-red-500 hover:bg-red-800"
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </>
+                          )}
+                          <UpdateStockDialog
+                            stock={stock}
+                            selectedStock={selectedStock}
+                            loading={isLoading}
+                            setSelectedStock={setSelectedStock}
+                            handleUpdateStock={handleUpdateStock}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             )}
           </CardContent>
         </Card>
