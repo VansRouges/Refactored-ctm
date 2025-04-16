@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { databases } from "@/lib/appwrite";
+import { databases, Query } from "@/lib/appwrite";
 import ENV from "@/constants/env";
 
 const databaseId = ENV.databaseId;
@@ -8,7 +8,12 @@ const collectionId = ENV.collections.transactions;
 export async function GET() {
   try {
     // Fetch transactions from Appwrite
-    const response = await databases.listDocuments(databaseId, collectionId);
+    const response = await databases.listDocuments(
+      databaseId, 
+      collectionId, 
+      [Query.limit(100)] // Max is 100
+    );
+    console.log("Admin Transactions log:", response.documents)
 
     // Sort transactions by date (newest first)
     const sortedTransactions = response.documents.sort(
