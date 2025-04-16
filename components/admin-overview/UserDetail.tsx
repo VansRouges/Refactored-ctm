@@ -1,4 +1,4 @@
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import type { SelectedUser } from "@/types"

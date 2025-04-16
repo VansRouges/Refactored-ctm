@@ -71,8 +71,8 @@ export default function Home() {
         roi: selectedUser.roi,
         currentValue: selectedUser.currentValue,
         totalInvestment: selectedUser.totalInvestment,
-        kycStatus: selectedUser.kycStatus,
-        accountStatus: selectedUser.accountStatus,
+        kycStatus: selectedUser.kycStatus ?? false,
+        accountStatus: selectedUser.accountStatus ?? false,
       })
       setIsUpdateModalOpen(true)
     }

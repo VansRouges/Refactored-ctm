@@ -15,7 +15,7 @@ export async function GET(request: Request) {
     const response = await databases.listDocuments(
       ENV.databaseId,
       ENV.collections.transactions,
-      [Query.equal("user_id", user_id)]
+      [Query.equal("user_id", user_id), Query.limit(100)] // Added Query.limit(100)
     );
 
     const transactions = response.documents.map((transaction) => ({
