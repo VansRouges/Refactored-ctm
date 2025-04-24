@@ -22,9 +22,12 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { TableSkeleton } from "@/skeletons";
 import { fetchTransactions, updateTransactionStatus } from "@/app/actions/admin/transactions";
+import { updateUserMetadata } from "@/app/actions/role";
+import { fetchAllUsers } from '@/app/actions/admin/users';
+import { User } from "@/types";
 
-export default function TransactionsPage() {
-  interface Transaction {
+
+interface Transaction {
     $id: string;
     isWithdraw: boolean;
     token_name: string;
@@ -35,8 +38,10 @@ export default function TransactionsPage() {
     status: string;
   }
 
+export default function TransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [users, setUsers] = useState<User[]>([]);
 
   // Fetch transactions from Appwrite database
   useEffect(() => {
@@ -45,6 +50,8 @@ export default function TransactionsPage() {
       try {
         const data = await fetchTransactions();
         setTransactions(data);
+        const { userData } = await fetchAllUsers()
+        setUsers(userData)
       } catch (error) {
         console.error("Error fetching transactions:", error);
         toast("Failed to fetch transactions.");
@@ -55,6 +62,35 @@ export default function TransactionsPage() {
 
     fetchData();
   }, []);
+
+  useEffect(() => {
+    const fetchCryptoPrices = async () => {
+      try {
+        const response = await fetch("https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest", {
+          headers: {
+            "X-CMC_PRO_API_KEY": "a8e86a57-c8a7-4fe3-9c18-d2f9c5ca1f67",
+          },
+        });
+  
+        if (!response.ok) {
+          throw new Error("Failed to fetch cryptocurrency data");
+        }
+  
+        const result = await response.json();
+        const simplifiedCryptos = result.data.map((crypto: any) => ({
+          name: crypto.name,
+          price: crypto.quote?.USD?.price,
+        }));
+  
+        console.log("Simplified Crypto List:", simplifiedCryptos);
+      } catch (error) {
+        console.error("Error fetching cryptocurrencies:", error);
+      }
+    };
+  
+    fetchCryptoPrices();
+  }, []);
+  
 
   const handleUpdateStatus = async (id: string, status: "approved" | "rejected") => {
     try {
@@ -72,6 +108,20 @@ export default function TransactionsPage() {
       });
     }
   };
+
+  // https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest
+  // API KEY: a8e86a57-c8a7-4fe3-9c18-d2f9c5ca1f67
+
+  // await updateUserMetadata({
+  //   userId: user.id,
+  //   metadata: {
+  //     roi: user?.publicMetadata.roi,
+  //     currentValue: user?.publicMetadata.currentValue,
+  //     totalInvestment: user?.publicMetadata.totalInvestment,
+  //     kycStatus: user?.publicMetadata.kycStatus,
+  //     accountStatus: user?.publicMetadata.accountStatus,
+  //   },
+  // })
 
   return (
     <motion.div

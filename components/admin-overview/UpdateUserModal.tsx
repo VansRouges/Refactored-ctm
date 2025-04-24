@@ -30,6 +30,16 @@ export const UpdateUserModal = ({
   setFormData,
   handleUpdateUser,
 }: UpdateUserModalProps) => {
+  const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>, field: keyof typeof formData) => {
+    const value = e.target.value;
+    // If input is empty, set to 0 instead of NaN
+    const numericValue = value === '' ? 0 : parseFloat(value);
+    setFormData({ 
+      ...formData, 
+      [field]: isNaN(numericValue) ? 0 : numericValue 
+    });
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
@@ -46,8 +56,9 @@ export const UpdateUserModal = ({
             <Input
               id="roi"
               type="number"
-              value={formData.roi}
-              onChange={(e) => setFormData({ ...formData, roi: parseFloat(e.target.value) })}
+              value={isNaN(formData.roi) ? '' : formData.roi}
+              min={0}
+              onChange={(e) => handleNumberChange(e, 'roi')}
               className="col-span-3"
             />
           </div>
@@ -56,8 +67,10 @@ export const UpdateUserModal = ({
             <Label htmlFor="currentValue" className="text-right">Current Value</Label>
             <Input
               id="currentValue"
-              value={formData.currentValue}
-              onChange={(e) => setFormData({ ...formData, currentValue: parseFloat(e.target.value) })}
+              type="number"
+              value={isNaN(formData.currentValue) ? '' : formData.currentValue}
+              min={0}
+              onChange={(e) => handleNumberChange(e, 'currentValue')}
               className="col-span-3"
             />
           </div>
@@ -66,8 +79,10 @@ export const UpdateUserModal = ({
             <Label htmlFor="totalInvestment" className="text-right">Total Investment</Label>
             <Input
               id="totalInvestment"
-              value={formData.totalInvestment}
-              onChange={(e) => setFormData({ ...formData, totalInvestment: parseFloat(e.target.value) })}
+              type="number"
+              value={isNaN(formData.totalInvestment) ? '' : formData.totalInvestment}
+              min={0}
+              onChange={(e) => handleNumberChange(e, 'totalInvestment')}
               className="col-span-3"
             />
           </div>
