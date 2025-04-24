@@ -32,8 +32,8 @@ import { toast } from "sonner"
 import { useState } from "react";
 import { createDeposit } from "@/app/actions/deposit";
 import { useUser } from "@clerk/nextjs";
-import { createCopyTrade } from "@/app/actions/copytrade";
-import { createStockPurchase } from "@/app/actions/stockPurchase";
+// import { createCopyTrade } from "@/app/actions/copytrade";
+// import { createStockPurchase } from "@/app/actions/stockPurchase";
 
 interface DepositFundsProps {
   form: UseFormReturn<{ currency: string; amount: number }>;
@@ -211,7 +211,7 @@ const DepositFunds: React.FC<DepositFundsProps> = ({
             </CardContent>
 
             <p className="text-sm text-muted-foreground mx-auto text-center max-w-[280px]">
-              NOTE: Processing may take 5-10 seconds after selection. Please don't close or refresh the page.
+              NOTE: Processing may take 5-10 seconds after selection. Please don&#39;t close or refresh the page.
             </p>
           </Card>
         </motion.div>

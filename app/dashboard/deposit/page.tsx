@@ -14,8 +14,8 @@ import DepositFunds from "@/components/user-deposit/DepositFunds";
 import type { DepositCryptocurrency} from "@/types";
 import { useUser } from "@clerk/nextjs";
 import { fetchCryptocurrencies } from "@/app/actions/fetch-crypto";
-import { createStockPurchase } from "@/app/actions/stockPurchase";
-import { createCopyTrade } from "@/app/actions/copytrade";
+// import { createStockPurchase } from "@/app/actions/stockPurchase";
+// import { createCopyTrade } from "@/app/actions/copytrade";
 import { createDeposit } from "@/app/actions/deposit";
 
 const depositSchema = z.object({
