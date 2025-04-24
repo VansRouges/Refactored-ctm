@@ -79,32 +79,32 @@ const DepositFunds: React.FC<DepositFundsProps> = ({
         full_name: user?.fullName,
       });
 
-      if (stockOption?.stock) {
-        createStockPurchase({
-          data: stockOption?.stock,
-          user_id: user?.id,
-          full_name: user?.fullName,
-          stock_initial_value:stockOption.stock.total,
-          stock_value_entered: form.getValues().amount,
-          stock_token: form.getValues().currency,
-          stock_quantity: stockOption?.stock?.total,
-          stock_status: "pending",
-          stock_token_address: selectedAddress,
-        })
-      }
+      // if (stockOption?.stock) {
+      //   createStockPurchase({
+      //     data: stockOption?.stock,
+      //     user_id: user?.id,
+      //     full_name: user?.fullName,
+      //     stock_initial_value:stockOption.stock.total,
+      //     stock_value_entered: form.getValues().amount,
+      //     stock_token: form.getValues().currency,
+      //     stock_quantity: stockOption?.stock?.total,
+      //     stock_status: "pending",
+      //     stock_token_address: selectedAddress,
+      //   })
+      // }
 
-      if (copyTrade?.copy) {
-        createCopyTrade({ 
-          data: copyTrade?.copy, 
-          trade_title: copyTrade?.copy.title,
-          user_id: user?.id, 
-          full_name: user?.fullName,
-          initial_investment: form.getValues().amount,
-          trade_token: form.getValues().currency,
-          trade_token_address: selectedAddress,
-          trade_status: "pending"      
-        })
-      }
+      // if (copyTrade?.copy) {
+      //   createCopyTrade({ 
+      //     data: copyTrade?.copy, 
+      //     trade_title: copyTrade?.copy.title,
+      //     user_id: user?.id, 
+      //     full_name: user?.fullName,
+      //     initial_investment: form.getValues().amount,
+      //     trade_token: form.getValues().currency,
+      //     trade_token_address: selectedAddress,
+      //     trade_status: "pending"      
+      //   })
+      // }
 
       dispatch(openModal({
         modalType: "deposit",
@@ -184,16 +184,16 @@ const DepositFunds: React.FC<DepositFundsProps> = ({
                       <FormLabel>Total Amount to Deposit</FormLabel>
                       <Input type="number" value={stockOption?.stock?.total} disabled className="mb-2" />
                       <p className="text-sm text-muted-foreground">
-                        Deposit the amount stated above in crypto to complete the stock purchase.
+                        Deposit the amount stated above in crypto to be able to purchase this Stock.
                       </p>
                     </div>
                   )}
                   {copyTrade?.copy?.title !== "" && Object.keys(copyTrade?.copy).length > 0 && (
                     <div>
                       <FormLabel>Plan</FormLabel>
-                      <Input type="text" value={copyTrade?.copy?.title} disabled className="mb-2" />
+                      {/* <Input type="text" value={copyTrade?.copy?.title} disabled className="mb-2" /> */}
                       <p className="text-sm text-muted-foreground">
-                        Deposit ${copyTrade?.copy?.trade_min} in crypto to complete the Plan purchase.
+                        Deposit ${copyTrade?.copy?.trade_min} in crypto to be able to purchase this Plan.
                       </p>
                     </div>
                   )}
@@ -209,6 +209,10 @@ const DepositFunds: React.FC<DepositFundsProps> = ({
                 </form>
               </FormProvider>
             </CardContent>
+
+            <p className="text-sm text-muted-foreground mx-auto text-center max-w-[280px]">
+              NOTE: Processing may take 5-10 seconds after selection. Please don't close or refresh the page.
+            </p>
           </Card>
         </motion.div>
       </div>

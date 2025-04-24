@@ -86,32 +86,32 @@ const Deposit = () => {
           });
 
           // Conditionally include stock data if available
-          if (stockOption?.stock) {
-            createStockPurchase({
-              data: stockOption?.stock,
-              user_id: user?.id,
-              stock_initial_value:  stockOption.stock.total,
-              full_name: user?.fullName,
-              stock_value_entered: form.getValues().amount,
-              stock_token: form.getValues().currency,
-              stock_quantity: stockOption?.stock?.total,
-              stock_status: "pending",
-              stock_token_address: selectedAddress,
-            })
-          }
+          // if (stockOption?.stock) {
+          //   createStockPurchase({
+          //     data: stockOption?.stock,
+          //     user_id: user?.id,
+          //     stock_initial_value:  stockOption.stock.total,
+          //     full_name: user?.fullName,
+          //     stock_value_entered: form.getValues().amount,
+          //     stock_token: form.getValues().currency,
+          //     stock_quantity: stockOption?.stock?.total,
+          //     stock_status: "pending",
+          //     stock_token_address: selectedAddress,
+          //   })
+          // }
 
-          if (copyTrade?.copy) {
-            createCopyTrade({ 
-              data: copyTrade?.copy, 
-              trade_title: copyTrade?.copy.title,
-              user_id: user?.id, 
-              full_name: user?.fullName,
-              initial_investment: form.getValues().amount,
-              trade_token: form.getValues().currency,
-              trade_token_address: selectedAddress,
-              trade_status: "pending"              
-            })
-          }
+          // if (copyTrade?.copy) {
+          //   createCopyTrade({ 
+          //     data: copyTrade?.copy, 
+          //     trade_title: copyTrade?.copy.title,
+          //     user_id: user?.id, 
+          //     full_name: user?.fullName,
+          //     initial_investment: form.getValues().amount,
+          //     trade_token: form.getValues().currency,
+          //     trade_token_address: selectedAddress,
+          //     trade_status: "pending"              
+          //   })
+          // }
 
           console.log("isConfirmed", isConfirmed)
         } catch (err) {
