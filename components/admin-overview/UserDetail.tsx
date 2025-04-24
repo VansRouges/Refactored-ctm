@@ -7,6 +7,7 @@ import { Edit, Plus } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { fetchTransactions } from "@/app/actions/fetchTransactions";
 import { useEffect, useState } from "react";
+import TransactionModal from "./user-deposit/transaction-modal";
 
 interface Transaction {
     $id: string;
@@ -22,6 +23,7 @@ interface Transaction {
 
 export default function UserDetail({ user, onUpdateClick }: { user: SelectedUser, onUpdateClick: () => void }) {
     const [transactions, setTransactions] = useState<Transaction[]>([]);
+    const [isModalOpen, setIsModalOpen] = useState(false)
 
     useEffect(() => {
         // Fetch transactions from Appwrite
@@ -119,9 +121,14 @@ export default function UserDetail({ user, onUpdateClick }: { user: SelectedUser
             <div className="grid gap-3">
                 <div className="flex items-center justify-between">
                 <div className="text-sm font-medium">Transactions</div>
-                <Button variant="ghost" size="sm" className="h-8 px-2">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Transaction
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-8 px-2"
+                  onClick={() => setIsModalOpen(true)} 
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Transaction
                 </Button>
                 </div>
                 <div className="rounded-md border">
@@ -175,6 +182,12 @@ export default function UserDetail({ user, onUpdateClick }: { user: SelectedUser
                 </Table>
                 </div>
 
+                <TransactionModal 
+                  isOpen={isModalOpen} 
+                  onClose={() => setIsModalOpen(false)} 
+                  userId={user?.id}
+                  fullName={user?.name}
+                />
             </div>
           </div>
         </CardContent>

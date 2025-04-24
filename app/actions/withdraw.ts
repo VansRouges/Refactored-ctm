@@ -1,4 +1,10 @@
-export const withdraw = async (currency: string, amount: number, address: string, user_id: string, full_name: string) => {
+export const withdraw = async (
+    currency: string, 
+    amount: number, 
+    address: string, 
+    user_id: string, 
+    full_name: string
+  ) => {
     try {
       const response = await fetch("/api/withdraw", {
         method: "POST",
