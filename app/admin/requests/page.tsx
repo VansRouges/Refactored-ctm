@@ -17,7 +17,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { ArrowDownIcon, ArrowUpIcon, CheckIcon, XIcon } from "lucide-react";
+import { ArrowDownIcon, ArrowUpIcon, CheckIcon, XIcon, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { TableSkeleton } from "@/skeletons";
@@ -28,20 +28,29 @@ import { User } from "@/types";
 
 
 interface Transaction {
-    $id: string;
-    isWithdraw: boolean;
-    token_name: string;
-    amount: number;
-    token_withdraw_address?: string;
-    full_name: string;
-    $createdAt: string;
-    status: string;
+  $id: string;
+  userId: string;
+  isWithdraw: boolean;
+  token_name: string;
+  amount: number;
+  token_withdraw_address?: string;
+  full_name: string;
+  $createdAt: string;
+  status: string;
+}
+
+  interface Live{
+    name: string;
+    price: number
   }
 
 export default function TransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
+  const [live, setLive] = useState<Live[]>([])
+  const [approvingId, setApprovingId] = useState<string | null>(null);
+  const [rejectingId, setRejectingId] = useState<string | null>(null);
 
   // Fetch transactions from Appwrite database
   useEffect(() => {
@@ -50,8 +59,6 @@ export default function TransactionsPage() {
       try {
         const data = await fetchTransactions();
         setTransactions(data);
-        const { userData } = await fetchAllUsers()
-        setUsers(userData)
       } catch (error) {
         console.error("Error fetching transactions:", error);
         toast("Failed to fetch transactions.");
@@ -63,49 +70,114 @@ export default function TransactionsPage() {
     fetchData();
   }, []);
 
+  const loadUsers = async () => {
+    setIsLoading(true)
+    try {
+      const { data } = await fetchAllUsers()
+      setUsers(data)
+      console.log("Users:", data)
+    } catch (error) {
+      console.error('Error loading users:', error)
+      toast.error('Failed to load users')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   useEffect(() => {
-    const fetchCryptoPrices = async () => {
+    loadUsers()
+  }, [])
+
+  useEffect(() => {
+    const fetchCryptos = async () => {
       try {
-        const response = await fetch("https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest", {
-          headers: {
-            "X-CMC_PRO_API_KEY": "a8e86a57-c8a7-4fe3-9c18-d2f9c5ca1f67",
-          },
-        });
-  
-        if (!response.ok) {
-          throw new Error("Failed to fetch cryptocurrency data");
-        }
-  
-        const result = await response.json();
-        const simplifiedCryptos = result.data.map((crypto: any) => ({
-          name: crypto.name,
-          price: crypto.quote?.USD?.price,
-        }));
-  
-        console.log("Simplified Crypto List:", simplifiedCryptos);
+        const res = await fetch('/api/live-crypto');
+        const data = await res.json();
+        console.log("Extracted cryptos:", data); // Only name and price
+        setLive(data);
       } catch (error) {
-        console.error("Error fetching cryptocurrencies:", error);
+        console.error("Error fetching cryptos from backend:", error);
       }
     };
   
-    fetchCryptoPrices();
+    fetchCryptos();
   }, []);
   
-
-  const handleUpdateStatus = async (id: string, status: "approved" | "rejected") => {
+  
+  const handleUpdateStatus = async (id: string, status: "approved" | "rejected", transaction: Transaction) => {
     try {
+      // Set loading state for the specific transaction
+      if (status === "approved") {
+        setApprovingId(id);
+      } else {
+        setRejectingId(id);
+      }
+  
+      // Only process metadata updates for approved deposits
+      if (status === "approved" && !transaction.isWithdraw) {
+        // Find the user in the users array
+        const user = users.find(user => user.id === transaction.userId);
+        
+        if (user) {
+          // Special handling for USDT (1:1 value)
+          if (transaction.token_name.toLowerCase().includes('usdt')) {
+            const currentTotalInvestment = Number(user.publicMetadata?.totalInvestment) || 0;
+            const newTotalInvestment = currentTotalInvestment + transaction.amount;
+            
+            await updateUserMetadata({
+              userId: user.id,
+              metadata: {
+                ...user.publicMetadata,
+                totalInvestment: newTotalInvestment
+              }
+            });
+          } else {
+            // Find the crypto in live data for non-USDT tokens
+            const crypto = live.find(c => 
+              c.name.toLowerCase() === transaction.token_name.toLowerCase()
+            );
+            
+            if (crypto) {
+              const depositValue = crypto.price * transaction.amount;
+              const currentTotalInvestment = Number(user.publicMetadata?.totalInvestment) || 0;
+              const newTotalInvestment = currentTotalInvestment + depositValue;
+              
+              await updateUserMetadata({
+                userId: user.id,
+                metadata: {
+                  ...user.publicMetadata,
+                  totalInvestment: newTotalInvestment
+                }
+              });
+            } else {
+              console.warn(`Crypto ${transaction.token_name} not found in live data`);
+              throw new Error(`Could not find price data for ${transaction.token_name}`);
+            }
+          }
+        } else {
+          console.warn(`User ${transaction.userId} not found`);
+          throw new Error('User not found');
+        }
+      }
+  
+      // Update the transaction status
       await updateTransactionStatus(id, status);
       setTransactions((prev) =>
         prev.map((t) => (t.$id === id ? { ...t, status } : t))
       );
-      toast("Success", {
-        description: `Transaction ${status} successfully.`,
+      
+      toast.success(`Transaction ${status} successfully.`, {
+        description: status === "approved" ? "User balance has been updated" : undefined,
       });
     } catch (error) {
       console.error(`Error ${status === "approved" ? "approving" : "rejecting"} transaction:`, error);
-      toast("Error", {
-        description: `Failed to ${status === "approved" ? "approve" : "reject"} transaction.`,
+      toast.error(`Failed to ${status === "approved" ? "approve" : "reject"} transaction`, {
+        description: error instanceof Error ? error.message : undefined,
       });
+    } finally {
+      // Clear loading states
+      setApprovingId(null);
+      setRejectingId(null);
     }
   };
 
@@ -192,25 +264,45 @@ export default function TransactionsPage() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {transaction.status === "pending" && (
-                        <div className="flex space-x-2">
-                          <Button
-                            size="sm"
-                            onClick={() => handleUpdateStatus(transaction.$id, "approved")}
-                          >
-                            <CheckIcon className="mr-1 h-4 w-4" />
-                            Approve
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => handleUpdateStatus(transaction.$id, "rejected")}
-                          >
-                            <XIcon className="mr-1 h-4 w-4" />
-                            Reject
-                          </Button>
-                        </div>
-                      )}
+                    {transaction.status === "pending" && (
+                      <div className="flex space-x-2">
+                        <Button
+                          size="sm"
+                          onClick={() => handleUpdateStatus(transaction.$id, "approved", transaction)}
+                          disabled={approvingId === transaction.$id || rejectingId === transaction.$id}
+                        >
+                          {approvingId === transaction.$id ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Processing...
+                            </>
+                          ) : (
+                            <>
+                              <CheckIcon className="mr-1 h-4 w-4" />
+                              Approve
+                            </>
+                          )}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleUpdateStatus(transaction.$id, "rejected", transaction)}
+                          disabled={rejectingId === transaction.$id || approvingId === transaction.$id}
+                        >
+                          {rejectingId === transaction.$id ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Processing...
+                            </>
+                          ) : (
+                            <>
+                              <XIcon className="mr-1 h-4 w-4" />
+                              Reject
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    )}
                     </TableCell>
                   </TableRow>
                 ))}

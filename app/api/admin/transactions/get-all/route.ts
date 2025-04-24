@@ -26,6 +26,7 @@ export async function GET() {
     // Map transactions to the desired format
     const transactions = sortedTransactions.map((doc) => ({
       $id: doc.$id,
+      userId: doc.user_id,
       isWithdraw: doc.isWithdraw,
       token_name: doc.token_name,
       amount: doc.amount,
