@@ -1,6 +1,22 @@
 // app/api/live-crypto/route.ts
 import { NextResponse } from 'next/server';
 
+// Extract only name and USD price
+interface CryptoQuote {
+  USD: {
+  price: number;
+  };
+}
+
+interface CryptoData {
+  name: string;
+  quote: CryptoQuote;
+}
+
+interface ApiResponse {
+  data: CryptoData[];
+}
+
 export async function GET() {
   const url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest';
   const headers = {
@@ -15,8 +31,7 @@ export async function GET() {
 
     const data = await res.json();
 
-    // Extract only name and USD price
-    const extracted = data.data.map((crypto: any) => ({
+    const extracted = (data as ApiResponse).data.map((crypto: CryptoData) => ({
       name: crypto.name,
       price: crypto.quote.USD.price,
     }));

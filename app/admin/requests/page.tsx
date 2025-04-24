@@ -24,7 +24,7 @@ import { TableSkeleton } from "@/skeletons";
 import { fetchTransactions, updateTransactionStatus } from "@/app/actions/admin/transactions";
 import { updateUserMetadata } from "@/app/actions/role";
 import { fetchAllUsers } from '@/app/actions/admin/users';
-import { User } from "@/types";
+import { User, Live } from "@/types";
 
 
 interface Transaction {
@@ -38,11 +38,6 @@ interface Transaction {
   $createdAt: string;
   status: string;
 }
-
-  interface Live{
-    name: string;
-    price: number
-  }
 
 export default function TransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -128,7 +123,8 @@ export default function TransactionsPage() {
               userId: user.id,
               metadata: {
                 ...user.publicMetadata,
-                totalInvestment: newTotalInvestment
+                totalInvestment: newTotalInvestment,
+                role: user.publicMetadata?.role as "admin" | "user" | undefined
               }
             });
           } else {
@@ -146,7 +142,8 @@ export default function TransactionsPage() {
                 userId: user.id,
                 metadata: {
                   ...user.publicMetadata,
-                  totalInvestment: newTotalInvestment
+                  totalInvestment: newTotalInvestment,
+                  role: user.publicMetadata?.role as "admin" | "user" | undefined
                 }
               });
             } else {

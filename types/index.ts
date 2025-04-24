@@ -15,6 +15,11 @@ export interface CopyTradingOption {
   trade_status: string;
 }
 
+export interface Live{
+  name: string;
+  price: number
+}
+
 export interface Testimonial {
     name: string;
     role: string;
