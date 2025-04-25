@@ -1,10 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import DepositForm from "./deposit-form"
 import WithdrawForm from "./withdraw-form"
+import { fetchCryptocurrencies } from "@/app/actions/fetch-crypto"
+import { toast } from "sonner"
 
 type TransactionType = "deposit" | "withdraw" | null
 
@@ -17,6 +19,23 @@ interface TransactionModalProps {
 
 export default function TransactionModal({ isOpen, onClose, userId, fullName }: TransactionModalProps) {
   const [transactionType, setTransactionType] = useState<TransactionType>(null)
+  const [cryptocurrencies, setCryptocurrencies] = useState<{ id: string; name: string; value: string; address: string }[]>([]);
+
+  useEffect(() => {
+    const getCryptocurrencies = async () => {
+      try {
+        const response = await fetchCryptocurrencies();
+        setCryptocurrencies(response);
+      } catch (error) {
+        console.error("Error fetching cryptocurrencies:", error);
+        toast.error("Error", {
+          description: "Failed to fetch cryptocurrency data.",
+        });
+      }
+    };
+
+    getCryptocurrencies();
+  }, []);
 
   const handleClose = () => {
     setTransactionType(null)
@@ -46,9 +65,9 @@ export default function TransactionModal({ isOpen, onClose, userId, fullName }: 
             </Button>
           </div>
         ) : transactionType === "deposit" ? (
-          <DepositForm onBack={() => setTransactionType(null)} userId={userId} fullName={fullName} onComplete={handleClose} />
+          <DepositForm onBack={() => setTransactionType(null)} cryptocurrencies={cryptocurrencies} userId={userId} fullName={fullName} onComplete={handleClose} />
         ) : (
-          <WithdrawForm onBack={() => setTransactionType(null)} userId={userId} fullName={fullName} onComplete={handleClose} />
+          <WithdrawForm onBack={() => setTransactionType(null)} cryptocurrencies={cryptocurrencies} userId={userId} fullName={fullName} onComplete={handleClose} />
         )}
       </DialogContent>
     </Dialog>

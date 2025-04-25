@@ -1,28 +1,33 @@
 "use client"
 
-import type React from "react"
-
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ChevronLeft } from "lucide-react"
 import { withdraw } from "@/app/actions/withdraw"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 interface WithdrawFormProps {
   onBack: () => void
   onComplete: () => void
+  cryptocurrencies: { id: string; name: string; value: string; address: string }[]
   userId: string | null | undefined
   fullName: string | null | undefined
 }
 
-export default function WithdrawForm({ onBack, onComplete, userId, fullName }: WithdrawFormProps) {
+export default function WithdrawForm({ onBack, onComplete, userId, fullName, cryptocurrencies }: WithdrawFormProps) {
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     token_name: "",
     amount: 0,
     token_withdraw_address: "",
-    user_id: "",
-    full_name: "",
   })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -30,28 +35,43 @@ export default function WithdrawForm({ onBack, onComplete, userId, fullName }: W
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
+  const handleTokenSelect = (value: string) => {
+    const selectedCrypto = cryptocurrencies.find(crypto => crypto.value === value)
+    if (selectedCrypto) {
+      setFormData(prev => ({
+        ...prev,
+        token_name: selectedCrypto.value
+      }))
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setIsLoading(true)
+    try{
+      const transactionData = {
+          ...formData,
+          amount: parseFloat(formData.amount.toString()),
+          isWithdraw: true,
+          isDeposit: false,
+          status: "pending",
+        }
 
-    // Here you would typically send this data to your backend
-    const transactionData = {
-      ...formData,
-      isWithdraw: true,
-      isDeposit: false,
-      status: "pending",
-      token_deposit_address: null,
+        await withdraw(
+          formData.token_name, 
+          transactionData.amount, 
+          formData.token_withdraw_address, 
+          userId || "", 
+          fullName || ""
+        )
+
+        console.log("Withdraw transaction:", transactionData)
+    } catch(error){
+      console.error("Error submitting withdrawal:", error)
+    } finally{
+      setIsLoading(false)
+      onComplete()
     }
-
-    await withdraw(
-        formData?.token_name, 
-        formData?.amount, 
-        formData?.token_withdraw_address, 
-        userId || "", 
-        fullName || ""
-    );
-
-    console.log("Withdraw transaction:", transactionData)
-    onComplete()
   }
 
   return (
@@ -62,8 +82,19 @@ export default function WithdrawForm({ onBack, onComplete, userId, fullName }: W
       </Button>
 
       <div className="space-y-2">
-        <Label htmlFor="token_name">Token Name</Label>
-        <Input id="token_name" name="token_name" value={formData.token_name} onChange={handleChange} required />
+        <Label htmlFor="token">Select Cryptocurrency</Label>
+        <Select onValueChange={handleTokenSelect} required>
+          <SelectTrigger>
+            <SelectValue placeholder="Select a token" />
+          </SelectTrigger>
+          <SelectContent>
+            {cryptocurrencies.map((crypto) => (
+              <SelectItem key={crypto.id} value={crypto.value}>
+                {crypto.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="space-y-2">
@@ -73,6 +104,7 @@ export default function WithdrawForm({ onBack, onComplete, userId, fullName }: W
           name="amount"
           type="number"
           step="any"
+          min="0"
           value={formData.amount}
           onChange={handleChange}
           required
@@ -80,28 +112,19 @@ export default function WithdrawForm({ onBack, onComplete, userId, fullName }: W
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="token_withdraw_address">Token Withdraw Address</Label>
+        <Label htmlFor="token_withdraw_address">Withdrawal Address</Label>
         <Input
           id="token_withdraw_address"
           name="token_withdraw_address"
           value={formData.token_withdraw_address}
           onChange={handleChange}
           required
+          placeholder="Enter wallet address for withdrawal"
         />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="user_id">User ID</Label>
-        <Input id="user_id" name="user_id" value={formData.user_id} onChange={handleChange} required />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="full_name">Full Name</Label>
-        <Input id="full_name" name="full_name" value={formData.full_name} onChange={handleChange} required />
-      </div>
-
-      <Button type="submit" className="w-full">
-        Submit Withdrawal
+      <Button disabled={isLoading} type="submit" className="w-full">
+        {isLoading ? "Processsing..." : "Submit Withdrawal"}
       </Button>
     </form>
   )

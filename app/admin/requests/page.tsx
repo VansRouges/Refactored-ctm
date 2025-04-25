@@ -108,53 +108,52 @@ export default function TransactionsPage() {
         setRejectingId(id);
       }
   
-      // Only process metadata updates for approved deposits
-      if (status === "approved" && !transaction.isWithdraw) {
-        // Find the user in the users array
+      // Process metadata updates for approved transactions
+      if (status === "approved") {
         const user = users.find(user => user.id === transaction.userId);
         
-        if (user) {
-          // Special handling for USDT (1:1 value)
-          if (transaction.token_name.toLowerCase().includes('usdt')) {
-            const currentTotalInvestment = Number(user.publicMetadata?.totalInvestment) || 0;
-            const newTotalInvestment = currentTotalInvestment + transaction.amount;
-            
-            await updateUserMetadata({
-              userId: user.id,
-              metadata: {
-                ...user.publicMetadata,
-                totalInvestment: newTotalInvestment,
-                role: user.publicMetadata?.role as "admin" | "user" | undefined
-              }
-            });
-          } else {
-            // Find the crypto in live data for non-USDT tokens
-            const crypto = live.find(c => 
-              c.name.toLowerCase() === transaction.token_name.toLowerCase()
-            );
-            
-            if (crypto) {
-              const depositValue = crypto.price * transaction.amount;
-              const currentTotalInvestment = Number(user.publicMetadata?.totalInvestment) || 0;
-              const newTotalInvestment = currentTotalInvestment + depositValue;
-              
-              await updateUserMetadata({
-                userId: user.id,
-                metadata: {
-                  ...user.publicMetadata,
-                  totalInvestment: newTotalInvestment,
-                  role: user.publicMetadata?.role as "admin" | "user" | undefined
-                }
-              });
-            } else {
-              console.warn(`Crypto ${transaction.token_name} not found in live data`);
-              throw new Error(`Could not find price data for ${transaction.token_name}`);
-            }
-          }
-        } else {
-          console.warn(`User ${transaction.userId} not found`);
+        if (!user) {
           throw new Error('User not found');
         }
+  
+        let newTotalInvestment = Number(user.publicMetadata?.totalInvestment) || 0;
+        let depositValue = 0;
+  
+        // Handle USDT transactions (1:1 value)
+        if (transaction.token_name.toLowerCase().includes('usdt')) {
+          depositValue = transaction.amount;
+        } else {
+          // Find crypto price for non-USDT tokens
+          const crypto = live.find(c => 
+            c.name.toLowerCase() === transaction.token_name.toLowerCase()
+          );
+          
+          if (!crypto) {
+            throw new Error(`Could not find price data for ${transaction.token_name}`);
+          }
+          depositValue = crypto.price * transaction.amount;
+        }
+  
+        // Handle withdrawals (subtract) vs deposits (add)
+        if (transaction.isWithdraw) {
+          // Verify sufficient balance before withdrawal
+          if (newTotalInvestment < depositValue) {
+            throw new Error('Insufficient funds for withdrawal');
+          }
+          newTotalInvestment -= depositValue;
+        } else {
+          newTotalInvestment += depositValue;
+        }
+  
+        // Update user metadata
+        await updateUserMetadata({
+          userId: user.id,
+          metadata: {
+            ...user.publicMetadata,
+            totalInvestment: newTotalInvestment,
+            role: user.publicMetadata?.role as "admin" | "user" | undefined
+          }
+        });
       }
   
       // Update the transaction status

@@ -1,28 +1,33 @@
 "use client"
 
-import type React from "react"
-
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ChevronLeft } from "lucide-react"
 import { createDeposit } from "@/app/actions/deposit"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 interface DepositFormProps {
   onBack: () => void
   onComplete: () => void
+  cryptocurrencies: { id: string; name: string; value: string; address: string }[]
   userId: string | null | undefined
   fullName: string | null | undefined
 }
 
-export default function DepositForm({ onBack, onComplete, userId, fullName }: DepositFormProps) {
+export default function DepositForm({ onBack, onComplete, userId, fullName, cryptocurrencies }: DepositFormProps) {
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     token_name: "",
     amount: 0,
     token_deposit_address: "",
-    user_id: "",
-    full_name: "",
   })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -30,26 +35,45 @@ export default function DepositForm({ onBack, onComplete, userId, fullName }: De
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
+  const handleTokenSelect = (value: string) => {
+    const selectedCrypto = cryptocurrencies.find(crypto => crypto.value === value)
+    if (selectedCrypto) {
+      setFormData(prev => ({
+        ...prev,
+        token_name: selectedCrypto.value,
+        token_deposit_address: selectedCrypto.address
+      }))
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setIsLoading(true)
 
-    // Here you would typically send this data to your backend
-    const transactionData = {
-      ...formData,
-      isWithdraw: false,
-      isDeposit: true,
-      status: "pending",
-    }
-    await createDeposit({
-        token_name: formData?.token_name,
-        amount: formData?.amount,
-        token_deposit_address: formData?.token_deposit_address,
+    try{
+      const transactionData = {
+        ...formData,
+        amount: parseFloat(formData.amount.toString()),
+        isWithdraw: false,
+        isDeposit: true,
+        status: "pending",
+      }
+
+      await createDeposit({
+        token_name: formData.token_name,
+        amount: transactionData.amount,
+        token_deposit_address: formData.token_deposit_address,
         user_id: userId,
         full_name: fullName,
-    });
+      })
 
-    console.log("Deposit transaction:", transactionData)
-    onComplete()
+      console.log("Deposit transaction:", transactionData)
+    } catch (error) {
+      console.error("Error creating deposit transaction:", error)
+    } finally {
+      setIsLoading(false)
+      onComplete()
+    }
   }
 
   return (
@@ -60,8 +84,19 @@ export default function DepositForm({ onBack, onComplete, userId, fullName }: De
       </Button>
 
       <div className="space-y-2">
-        <Label htmlFor="token_name">Token Name</Label>
-        <Input id="token_name" name="token_name" value={formData.token_name} onChange={handleChange} required />
+        <Label htmlFor="token">Select Cryptocurrency</Label>
+        <Select onValueChange={handleTokenSelect} required>
+          <SelectTrigger>
+            <SelectValue placeholder="Select a token" />
+          </SelectTrigger>
+          <SelectContent>
+            {cryptocurrencies.map((crypto) => (
+              <SelectItem key={crypto.id} value={crypto.value}>
+                {crypto.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="space-y-2">
@@ -71,6 +106,7 @@ export default function DepositForm({ onBack, onComplete, userId, fullName }: De
           name="amount"
           type="number"
           step="any"
+          min="0"
           value={formData.amount}
           onChange={handleChange}
           required
@@ -85,21 +121,12 @@ export default function DepositForm({ onBack, onComplete, userId, fullName }: De
           value={formData.token_deposit_address}
           onChange={handleChange}
           required
+          readOnly // Since we're auto-populating this from the selection
         />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="user_id">User ID</Label>
-        <Input id="user_id" name="user_id" value={formData.user_id} onChange={handleChange} required />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="full_name">Full Name</Label>
-        <Input id="full_name" name="full_name" value={formData.full_name} onChange={handleChange} required />
-      </div>
-
-      <Button type="submit" className="w-full">
-        Submit Deposit
+      <Button disabled={isLoading} type="submit" className="w-full">
+      {isLoading ? "Processsing..." : "Submit Deposit"}
       </Button>
     </form>
   )
