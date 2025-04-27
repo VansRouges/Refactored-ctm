@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ArrowUpDown, RefreshCw, TrendingUp, TrendingDown } from "lucide-react";
-import ManageCopyTradingModal from "./modals/manage-copy-trading";
+import ManageCopyTradingModal from "../modals/manage-copy-trading";
 import { TableSkeleton } from "@/skeletons";
 import { useUser } from "@clerk/nextjs";
 import { fetchCopiedTrades } from "@/app/actions/fetchCopiedTrades";

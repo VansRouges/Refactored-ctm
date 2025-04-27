@@ -2,15 +2,16 @@
 
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import CopyTradingPage from "@/components/copied-trades";
-import StockPage from "@/components/stocks-purchased";
+import CopyTradingPage from "@/components/user-portfolio/copied-trades";
+import StockPage from "@/components/user-portfolio/stocks-purchased";
 import { clearStockOption } from "@/store/stockOptionsSlice";
 import { clearCopyTrade } from "@/store/copyTradeSlice";
 import { useDispatch } from "react-redux";
+import CryptoBalance from "@/components/user-portfolio/crypto-balance";
 
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState("stocks");
+  const [activeTab, setActiveTab] = useState("crypto");
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -46,9 +47,7 @@ export default function AdminDashboard() {
           <StockPage />
         </TabsContent>
         <TabsContent value="crypto" className="mt-6">
-          <div>
-            <p>Coming Soon</p>
-          </div>
+          <CryptoBalance />
         </TabsContent>
         <TabsContent value="copy-trades" className="mt-6">
           <CopyTradingPage />
