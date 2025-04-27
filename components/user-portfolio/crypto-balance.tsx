@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useUser } from "@clerk/nextjs"
 import { toast } from "sonner"
 import { Live } from "@/types";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Transaction {
   $id: string;
@@ -21,7 +22,7 @@ interface Transaction {
 }
 
 export default function CryptoBalance() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Initialize as true
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [live, setLive] = useState<Live[]>([]);
   const { user } = useUser();
@@ -37,8 +38,6 @@ export default function CryptoBalance() {
       } catch (error) {
         console.error("Error fetching transactions:", error);
         toast("Failed to fetch.");
-      } finally {
-        setIsLoading(false);
       }
     };
 
@@ -53,6 +52,8 @@ export default function CryptoBalance() {
         setLive(data);
       } catch (error) {
         console.error("Error fetching cryptos from backend:", error);
+      } finally {
+        setIsLoading(false); // Set loading to false when both fetches are done
       }
     };
   
@@ -65,6 +66,30 @@ export default function CryptoBalance() {
     return sum + (crypto ? transaction.amount * crypto.price : 0);
   }, 0);
 
+  // Skeleton loading rows
+  const skeletonRows = Array(5).fill(0).map((_, index) => (
+    <TableRow key={`skeleton-${index}`}>
+      <TableCell>
+        <div className="flex items-center gap-3">
+          <Skeleton className="h-8 w-8 rounded-full" />
+          <Skeleton className="h-4 w-24" />
+        </div>
+      </TableCell>
+      <TableCell className="text-right">
+        <Skeleton className="h-4 w-16 ml-auto" />
+      </TableCell>
+      <TableCell className="text-right">
+        <Skeleton className="h-4 w-16 ml-auto" />
+      </TableCell>
+      <TableCell className="text-right">
+        <Skeleton className="h-4 w-16 ml-auto" />
+      </TableCell>
+      <TableCell className="text-right">
+        <Skeleton className="h-4 w-10 ml-auto" />
+      </TableCell>
+    </TableRow>
+  ));
+
   return (
     <main className="container mx-auto py-4 px-4 md:px-6 mb-10">
       <div className="flex flex-col gap-6">
@@ -76,9 +101,13 @@ export default function CryptoBalance() {
           </div>
           <div className="bg-muted p-4 rounded-lg">
             <div className="text-sm text-muted-foreground">Total Value</div>
-            <div className="text-2xl font-bold">
-              ${totalValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </div>
+            {isLoading ? (
+              <Skeleton className="h-8 w-32 mt-1" />
+            ) : (
+              <div className="text-2xl font-bold">
+                ${totalValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </div>
+            )}
           </div>
         </div>
 
@@ -96,46 +125,50 @@ export default function CryptoBalance() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {transactions.map((transaction) => {
-                  const crypto = live.find(c => c.name === transaction.token_name);
-                  const value = crypto ? transaction.amount * crypto.price : 0;
-                  
-                  return (
-                    <TableRow key={transaction.$id}>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-8 w-8">
-                            <AvatarImage src="/placeholder.svg" alt={transaction.token_name} />
-                            <AvatarFallback>{transaction.token_name.substring(0, 2)}</AvatarFallback>
-                          </Avatar>
-                          <div className="font-medium">{transaction.token_name}</div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right font-medium">
-                        {transaction.amount < 1 ? transaction.amount : transaction.amount.toLocaleString("en-US")}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {crypto ? `$${
-                          crypto.price < 1
-                            ? crypto.price.toFixed(4)
-                            : crypto.price.toLocaleString("en-US", {
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2,
-                              })
-                        }` : '-'}
-                      </TableCell>
-                      <TableCell className="text-right font-medium">
-                        ${value.toLocaleString("en-US", {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        })}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        -
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
+                {isLoading ? (
+                  skeletonRows
+                ) : (
+                  transactions.map((transaction) => {
+                    const crypto = live.find(c => c.name === transaction.token_name);
+                    const value = crypto ? transaction.amount * crypto.price : 0;
+                    
+                    return (
+                      <TableRow key={transaction.$id}>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-8 w-8">
+                              <AvatarImage src="/placeholder.svg" alt={transaction.token_name} />
+                              <AvatarFallback>{transaction.token_name.substring(0, 2)}</AvatarFallback>
+                            </Avatar>
+                            <div className="font-medium">{transaction.token_name}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right font-medium">
+                          {transaction.amount < 1 ? transaction.amount : transaction.amount.toLocaleString("en-US")}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {crypto ? `$${
+                            crypto.price < 1
+                              ? crypto.price.toFixed(4)
+                              : crypto.price.toLocaleString("en-US", {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                })
+                          }` : '-'}
+                        </TableCell>
+                        <TableCell className="text-right font-medium">
+                          ${value.toLocaleString("en-US", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          -
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
               </TableBody>
             </Table>
           </div>
