@@ -5,6 +5,7 @@ export const createCopyTrade = async ({
   trade_token,
   trade_token_address, 
   trade_status,
+  trade_duration,
   user_id,
   full_name,
 }: {
@@ -19,13 +20,18 @@ export const createCopyTrade = async ({
   trade_title: string;
   trade_token: string;
   trade_token_address: string;
+  trade_duration: number;
   trade_status: string;
   user_id: string | null | undefined;
   full_name: string | null | undefined;
 }) => {
-  const copyTradePayload =
-  data && trade_title?.trim() !== "" 
-      ? {
+  // Calculate profit/loss ratio
+  const trade_profit_loss = data.trade_roi_max !== 0 
+    ? data.trade_roi_min / data.trade_roi_max 
+    : 0; // Prevent division by zero
+
+  const copyTradePayload = data && trade_title?.trim() !== "" 
+    ? {
       trade_title,
       trade_min: data.trade_min,
       trade_max: data.trade_max,
@@ -34,7 +40,8 @@ export const createCopyTrade = async ({
       trade_win_rate: 0.0,
       trade_risk: data.trade_risk,
       trade_current_value: 0.0,
-      trade_profit_loss: 0.0,
+      trade_profit_loss, // Using the calculated value
+      trade_duration,
       isProfit: false,
       initial_investment,
       trade_token,
@@ -42,22 +49,21 @@ export const createCopyTrade = async ({
       trade_status,
       user_id,
       full_name
-    } :
-    null
+    } 
+    : null;
 
-    try {
-      const response = await fetch("/api/copytrade-purchase", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(copyTradePayload),
-      });
-  
-      if (!response.ok) throw new Error("Failed to create copy trade");
-      console.log("Copy trade created successfully", response)
-      return await response.json();
-    } catch (error) {
-      console.error("Error in createCopyTrade:", error);
-      throw error;
-    }
-  };
-  
+  try {
+    const response = await fetch("/api/copytrade-purchase", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(copyTradePayload),
+    });
+
+    if (!response.ok) throw new Error("Failed to create copy trade");
+    console.log("Copy trade created successfully", response);
+    return await response.json();
+  } catch (error) {
+    console.error("Error in createCopyTrade:", error);
+    throw error;
+  }
+};

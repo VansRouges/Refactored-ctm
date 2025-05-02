@@ -13,6 +13,7 @@ import { TradeFormModal } from "./user-deposit/trade-modal";
 import { useUser } from "@clerk/nextjs";
 import { fetchTrades } from "@/app/actions/fetch-trade";
 import { createCopyTrade } from "@/app/actions/copytrade";
+import { Transaction, Live } from "@/types";
 
 export function CopyTradingOptions({ portfolio }: 
   { 
@@ -79,22 +80,17 @@ export function CopyTradingOptions({ portfolio }:
         createCopyTrade({ 
           data: selectedTrade, 
           trade_title: selectedTrade.trade_title,
+          trade_duration: selectedTrade?.trade_duration,
           user_id: user?.id, 
           full_name: user?.fullName,
           initial_investment: amount,
           trade_token: "fromBalance",
           trade_token_address: "fromBalance",
-          trade_status: "approved",
+          trade_status: "pending",
         })
         
         const newTotalInvestment = portfolio.total_investment - amount;
         console.log("New total investment:", newTotalInvestment);
-        // await databases.updateDocument(
-        //   ENV.databaseId,
-        //   ENV.collections.profile,
-        //   user?.id || "",
-        //   { total_investment: newTotalInvestment }
-        // );
         setOpen(false);
         setSelectedTrade(null);
         toast("Trade Purchased!", { description: "Thank you for your purchase!" });

@@ -3,10 +3,14 @@ export interface CopyTradingOption {
   trade_title: string;
   trade_token: string;
   full_name?: string;
+  trade_duration?: number;
   trade_token_address?: string;
   initial_investment: number;
   trade_current_value: number;
+  trade_roi_min?: number,
+  trade_roi_max?: number,
   isProfit: boolean;
+  user_id?: string;
   trade_profit_loss: number;
   trade_win_rate: number;
   trade_risk: string;

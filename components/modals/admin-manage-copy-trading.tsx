@@ -118,11 +118,6 @@ const AdminManageCopyTradingModal: React.FC<AdminManageCopyTradingModalProps> = 
                         }
                     </DialogTitle>
                 </DialogHeader>
-                <DialogDescription>
-                    This user, <b>{selectedOption?.full_name}</b> has <b>{selectedOption?.trade_status === "pending" ? "claimed to have deposited"
-                    : selectedOption?.trade_status === "rejected" ? "not deposited" : "deposited"} {formatCurrency(selectedOption?.initial_investment)}</b> in this token, {selectedOption?.trade_token}
-                    {" "}to this address, <b>{selectedOption?.trade_token_address}</b>. Please confirm and approve or reject to edit trade information.
-                </DialogDescription>
                 <div className="space-y-4">
                     <div>
                         <Label>Trade Title</Label>
@@ -193,7 +188,7 @@ const AdminManageCopyTradingModal: React.FC<AdminManageCopyTradingModalProps> = 
                             className="bg-gray-100"
                         />
                     </div>
-                    <div>
+                    {/* <div>
                         <Label>Win Rate</Label>
                         <Input
                             value={selectedOption?.trade_win_rate || ""}
@@ -204,7 +199,7 @@ const AdminManageCopyTradingModal: React.FC<AdminManageCopyTradingModalProps> = 
                                 })
                             }
                         />
-                    </div>
+                    </div> */}
                     <div>
                         <Label>Status</Label>
                         <Input

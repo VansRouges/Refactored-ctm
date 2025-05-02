@@ -28,7 +28,7 @@ interface CopyTradingTableProps {
   sortConfig: { key: string; direction: string };
   handleFilter: (value: string) => void;
   handleSort: (key: keyof CopyTradingOption) => void;
-  handleUpdateTradeStatus: (tradeId: string, status: string) => void;
+  handleUpdateTradeStatus: (tradeId: string, status: string, option: CopyTradingOption) => void;
   handleManage: (option: CopyTradingOption) => void;
   fetchCopyTradingData: () => void;
 }
@@ -43,6 +43,7 @@ export const CopyTradingTable = ({
   handleManage,
   fetchCopyTradingData,
 }: CopyTradingTableProps) => {
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.8 }}
@@ -93,7 +94,7 @@ export const CopyTradingTable = ({
                       { label: "Initial Investment", key: "initial_investment" },
                       { label: "Current Value", key: "trade_current_value" },
                       { label: "Profit/Loss %", key: "trade_profit_loss" },
-                      { label: "Win Rate %", key: "trade_win_rate" },
+                      // { label: "Win Rate %", key: "trade_win_rate" },
                       { label: "Risk Level", key: "trade_risk" },
                       { label: "Copied Since", key: "copiedSince" },
                       { label: "Status", key: "trade_status" },
@@ -140,7 +141,7 @@ export const CopyTradingTable = ({
                         )}
                         {option?.trade_profit_loss}%
                       </TableCell>
-                      <TableCell>{option?.trade_win_rate}%</TableCell>
+                      {/* <TableCell>{option?.trade_win_rate}%</TableCell> */}
                       <TableCell>
                         <span
                           className={`px-2 py-1 capitalize rounded-full text-xs ${
@@ -180,7 +181,7 @@ export const CopyTradingTable = ({
                                     "Are you sure you want to approve this Trade?"
                                   )
                                 ) {
-                                  handleUpdateTradeStatus(option.$id, "approved");
+                                  handleUpdateTradeStatus(option.$id, "approved", option);
                                 }
                               }}
                               className="text-white bg-green-500 hover:bg-green-800"
@@ -194,7 +195,7 @@ export const CopyTradingTable = ({
                                     "Are you sure you want to reject this trade?"
                                   )
                                 ) {
-                                  handleUpdateTradeStatus(option.$id, "rejected");
+                                  handleUpdateTradeStatus(option.$id, "rejected", option);
                                 }
                               }}
                               className="text-white bg-red-500 hover:bg-red-800"

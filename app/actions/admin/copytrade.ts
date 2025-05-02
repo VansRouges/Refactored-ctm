@@ -23,14 +23,14 @@ export async function fetchCopyTradingData() {
     }
   }
 
-  export async function updateTradeStatus(tradeId: string, status: string) {
+  export async function updateTradeStatus(tradeId: string, status: string, tradeDuration: number | undefined) {
     try {
       const response = await fetch("/api/admin/copytrade/update-status", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ tradeId, status }),
+        body: JSON.stringify({ tradeId, status, tradeDuration }),
       });
   
       if (!response.ok) {

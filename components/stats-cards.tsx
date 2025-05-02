@@ -12,7 +12,7 @@ export function StatsCards({ stats }: StatsCardsProps) {
     <div className="grid gap-4 md:grid-cols-3">
       <Card className="text-appDarkCard overflow-x-scroll dark:text-white hover:bg-appCardGold hover:dark:text-appDarkCard transition-all duration-300 ease-linear">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-base font-medium">Total Investment</CardTitle>
+          <CardTitle className="text-base font-medium">Total Balance</CardTitle>
           <Wallet className="h-4 w-4" />
         </CardHeader>
         <CardContent>

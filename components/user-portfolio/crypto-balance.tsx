@@ -1,5 +1,4 @@
 "use client"
-
 import { useState, useEffect } from "react"
 import { fetchTransactions } from "@/app/actions/fetchTransactions"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"

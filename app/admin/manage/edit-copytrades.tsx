@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,11 +18,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Plus } from "lucide-react";
-import { databases, ID } from "@/lib/appwrite";
 import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner"
 import { Trade } from "@/types/dashboard";
-import ENV from "@/constants/env";
 import { TableSkeleton } from "@/skeletons";
 import { TraderForm } from "@/components/admin-manage/admin-copytrades-form";
 import { DeleteTradeDialog, EditTradeDialog } from "@/components/admin-manage/admin-editcopytrades-form";
@@ -36,46 +34,32 @@ export default function AdminCopyTrading() {
   const [editingTrades, setEditingTrades] = useState<Trade | null>(null);
   const { user } = useUser();
 
-  const databaseId = ENV.databaseId;
-  const collectionId = ENV.collections.copyTrading;
-
-  // Fetch traders from Appwrite on component mount
-  const fetchTraders = useCallback(async () => {
+  const fetchData = async () => {
     setIsLoading(true);
     try {
-      const response = await databases.listDocuments(
-        databaseId,
-        collectionId
-      );
-      setTrades(
-        response.documents.map((doc) => ({
-          id: doc.$id,
-          trade_title: doc.trade_title,
-          trade_max: doc.trade_max,
-          trade_min: doc.trade_min,
-          trade_roi_min: doc.trade_roi_min,
-          trade_roi_max: doc.trade_roi_max,
-          trade_description: doc.trade_description,
-          trade_risk: doc.trade_risk,
-          trade_duration: doc.trade_duration,
-          user_id: doc.user_id,
-          user_name: doc.user_name,
-        }))
-      );
-    } catch (error) {
-      console.error("Failed to fetch traders:", error);
+      const response = await fetch('/api/admin/copytrade/manage');
+      if (!response.ok) throw new Error('Failed to fetch');
+      const data = await response.json();
+      setTrades(data);
+    } catch (err) {
+      console.error('Error fetching data:', err);
+      toast.error(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setIsLoading(false);
     }
-  }, [databaseId, collectionId]);
+  };
 
-    
+  // Fetch traders from Appwrite on component mount
+  useEffect(() => {
+    fetchData();
+  }, []);
+
 
   console.log("Trades", trades)
 
   const refreshTrades = async () => {
       try {
-        await fetchTraders();
+        await fetchData();
       } catch (err) {
         const error = err as Error;
         console.error("Error refreshing tokens", error);
@@ -83,7 +67,7 @@ export default function AdminCopyTrading() {
           description: error.message,
         });
       }
-    };
+  };
 
   const handleAddTrade = async (
     newTrade: Omit<Trade, "id" | "user_id" | "user_name">
@@ -91,24 +75,20 @@ export default function AdminCopyTrading() {
     setIsLoading(true);
     console.log("checking trade_risk", newTrade?.trade_risk);
     try {
-      const response = await databases.createDocument(
-        databaseId,
-        collectionId,
-        ID.unique(),
-        {
-          trade_title: newTrade.trade_title,
-          trade_max: newTrade.trade_max,
-          trade_min: newTrade.trade_min,
-          trade_description: newTrade.trade_description,
-          trade_roi_min: newTrade?.trade_roi_min,
-          trade_roi_max: newTrade?.trade_roi_max,
-          trade_risk: newTrade?.trade_risk,
-          trade_duration: newTrade?.trade_duration,
-          user_id: user?.id,
-          user_name: user?.username,
-        }
-      );
-      setTrades([...trades, { ...newTrade, id: response.$id }]);
+      const response = await fetch('/api/admin/copytrade/manage', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...newTrade,
+          user_id: user?.id, // Replace with actual user ID
+          user_name: user?.username // Replace with actual username
+        }),
+      });
+
+      const createdTrade = await response.json();
+      setTrades([...trades, createdTrade]);
       toast("New Trade Added",{
         description: `Added ${newTrade?.trade_title}`,
       });
@@ -131,28 +111,17 @@ export default function AdminCopyTrading() {
     console.log("checking trade_risk", updatedTrade?.trade_risk);
     
     try {
-      await databases.updateDocument(
-        databaseId,
-        collectionId,
-        updatedTrade?.id,
-        {
-          trade_title: updatedTrade.trade_title,
-          trade_max: updatedTrade.trade_max,
-          trade_min: updatedTrade.trade_min,
-          trade_description: updatedTrade.trade_description,
-          trade_roi_min: updatedTrade?.trade_roi_min,
-          trade_roi_max: updatedTrade?.trade_roi_max,
-          trade_risk: updatedTrade?.trade_risk,
-          trade_duration: updatedTrade?.trade_duration,
-        }
-      );
-  
-      // Correctly updating the trades state instead of appending
-      setTrades((prevTrades) =>
-        prevTrades.map((trade) =>
-          trade.id === updatedTrade.id ? { ...trade, ...updatedTrade } : trade
-        )
-      );
+      await fetch('/api/admin/copytrade/manage', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedTrade),
+      });
+
+      setTrades(trades.map(trade => 
+        trade.id === updatedTrade.id ? updatedTrade : trade
+      ));
   
       toast("Trade Updated", {
         description: `Successfully updated ${updatedTrade?.trade_title}`,
@@ -171,12 +140,18 @@ export default function AdminCopyTrading() {
     }
   };
   
-
   const handleDeleteTrade = async (id: string) => {
     setIsLoading(true);
     try {
-      await databases.deleteDocument(databaseId, collectionId, id);
-      setTrades(trades.filter((trade) => trade.id !== id));
+      await fetch('/api/admin/copytrade/manage', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id }),
+      });
+
+      setTrades(trades.filter(trade => trade.id !== id));
       toast("Delete Trade", {
         description: "Deleted Trade Successfully!",
       });
@@ -191,9 +166,6 @@ export default function AdminCopyTrading() {
     }
   };
 
-  useEffect(() => {
-    fetchTraders();
-  }, [fetchTraders]);
 
   return (
     <Card className="w-full">
@@ -230,7 +202,7 @@ export default function AdminCopyTrading() {
                 <TableHead>Trade Min</TableHead>
                 <TableHead>Trade Max</TableHead>
                 <TableHead>Trade ROI Min(%)</TableHead>
-                <TableHead>Trade ROI Min(%)</TableHead>
+                <TableHead>Trade ROI Max(%)</TableHead>
                 <TableHead>Trade Duration</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
