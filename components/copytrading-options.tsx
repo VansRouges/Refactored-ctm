@@ -13,7 +13,7 @@ import { TradeFormModal } from "./user-deposit/trade-modal";
 import { useUser } from "@clerk/nextjs";
 import { fetchTrades } from "@/app/actions/fetch-trade";
 import { createCopyTrade } from "@/app/actions/copytrade";
-import { Transaction, Live } from "@/types";
+
 
 export function CopyTradingOptions({ portfolio }: 
   { 

@@ -7,7 +7,7 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { Transaction, Live } from "@/types";
+// import { Transaction, Live } from "@/types";
 
 interface TradeFormProps {
     trade: {

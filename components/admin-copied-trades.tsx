@@ -61,8 +61,9 @@ const AdminCopyTradingPage = () => {
   }, []);
 
   const [users, setUsers] = useState<User[]>([]);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  // const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [live, setLive] = useState<Live[]>([]);
+
 
   // useEffect(() => {
   //   const fetchData = async () => {
@@ -79,19 +80,19 @@ const AdminCopyTradingPage = () => {
   //   fetchData();
   // }, [userId]);
 
-  useEffect(() => {
-    const fetchCryptos = async () => {
-      try {
-        const res = await fetch('/api/live-crypto');
-        const data = await res.json();
-        setLive(data);
-      } catch (error) {
-        console.error("Error fetching cryptos from backend:", error);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchCryptos = async () => {
+  //     try {
+  //       const res = await fetch('/api/live-crypto');
+  //       const data = await res.json();
+  //       setLive(data);
+  //     } catch (error) {
+  //       console.error("Error fetching cryptos from backend:", error);
+  //     }
+  //   };
   
-    fetchCryptos();
-  }, []);
+  //   fetchCryptos();
+  // }, []);
 
   const loadUsers = async () => {
     // setIsLoading(true)
@@ -176,15 +177,15 @@ const AdminCopyTradingPage = () => {
           console.log("newCurrentValue", newCurrentValue)
   
           // // Update user metadata
-          // await updateUserMetadata({
-          //   userId: user.id,
-          //   metadata: {
-          //     ...currentMetadata,
-          //     totalInvestment: newTotalInvestment,
-          //     currentValue: newCurrentValue,
-          //     role: user.publicMetadata?.role as "admin" | "user" | undefined
-          //   }
-          // });
+          await updateUserMetadata({
+            userId: user.id,
+            metadata: {
+              ...currentMetadata,
+              totalInvestment: newTotalInvestment,
+              currentValue: newCurrentValue,
+              role: user.publicMetadata?.role as "admin" | "user" | undefined
+            }
+          });
 
           const transactions = await fetchTransactions(user?.id);
           console.log("Transactions", transactions)
@@ -197,14 +198,14 @@ const AdminCopyTradingPage = () => {
       }
   
       // Update the trade status (for both approved and rejected)
-      // await updateTradeStatus(tradeId, status, option?.trade_duration);
+      await updateTradeStatus(tradeId, status, option?.trade_duration);
   
       // Update local state
-      // setCopyTradingOptions(prevTrade =>
-      //   prevTrade.map(trade =>
-      //     trade.$id === tradeId ? { ...trade, trade_status: status } : trade
-      //   )
-      // );
+      setCopyTradingOptions(prevTrade =>
+        prevTrade.map(trade =>
+          trade.$id === tradeId ? { ...trade, trade_status: status } : trade
+        )
+      );
   
       toast.success(`Trade status updated to ${status}`);
       

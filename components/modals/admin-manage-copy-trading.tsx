@@ -6,7 +6,7 @@ import {
     DialogHeader,
     DialogTitle,
     DialogFooter,
-    DialogDescription
+    // DialogDescription
 } from "@/components/ui/dialog";
 import {
     Select,
@@ -20,7 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner"
 import { updateTrade } from "@/app/actions/admin/copytrade";
-import { formatCurrency } from "@/lib/utils";
+// import { formatCurrency } from "@/lib/utils";
 
 interface AdminManageCopyTradingModalProps {
     isOpen: boolean;

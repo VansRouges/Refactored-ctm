@@ -62,7 +62,7 @@ export default function UserDashboard() {
     syncInvestment();
     dispatch(clearStockOption());
     dispatch(clearCopyTrade());
-  }, [user, transactions, live, totalValue]);
+  }, [user, transactions, live, totalValue, isSyncing, dispatch]);
 
   // Fetch transactions with improved error handling
   useEffect(() => {
