@@ -3,13 +3,13 @@ import React, { useEffect, useState } from "react";
 import AdminManageCopyTradingModal from "@/components/modals/admin-manage-copy-trading";
 import { toast } from "sonner"
 import { fetchCopyTradingData, updateTradeStatus } from "@/app/actions/admin/copytrade";
-import type { CopyTradingOption, Live, Transaction, User } from "@/types";
+import type { CopyTradingOption, User } from "@/types";
 import { CopyTradingTable } from "./admin-copied-trades-table";
 import { fetchAllUsers } from "@/app/actions/admin/users";
 import { updateUserMetadata } from "@/app/actions/role";
 import { fetchTransactions } from "@/app/actions/fetchTransactions";
 
-// export interface CopyTradingOption {
+// export interface CopyTradingOption {fixed
 //   $id: string;
 //   trade_title: string;
 //   trade_token: string;
@@ -62,7 +62,7 @@ const AdminCopyTradingPage = () => {
 
   const [users, setUsers] = useState<User[]>([]);
   // const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [live, setLive] = useState<Live[]>([]);
+  // const [live, setLive] = useState<Live[]>([]);
 
 
   // useEffect(() => {

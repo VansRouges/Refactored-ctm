@@ -15,6 +15,8 @@ const navigation = [
     href: "/dashboard/portfolio",
     icon: "bytesize:portfolio",
   },
+  { name: "Buy/Sell", href: "/dashboard/buy-sell", icon: "icon-park-outline:exchange" },
+  { name: "CopyTrade", href: "/dashboard/copytrade", icon: "ph:copy-light" },
   { name: "Deposit", href: "/dashboard/deposit", icon: "ph:hand-deposit" },
   { name: "Withdraw", href: "/dashboard/withdraw", icon: "ph:hand-withdraw" },
   { name: "History", href: "/dashboard/history", icon: "solar:history-bold" },
@@ -32,7 +34,6 @@ const secondaryNavigation = [
     icon: "tabler:help" 
   },
 ];
-
 
 export default function Sidebar() {
   const pathname = usePathname();

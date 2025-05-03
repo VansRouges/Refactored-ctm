@@ -1,7 +1,7 @@
 import { formatCurrency } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
-import type { SelectedUser } from "@/types"
+import type { SelectedUser, Live } from "@/types"
 import { Button } from "../ui/button";
 import { Edit, Plus } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
@@ -24,24 +24,41 @@ interface Transaction {
 export default function UserDetail({ user, onUpdateClick }: { user: SelectedUser, onUpdateClick: () => void }) {
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const [liveData, setLiveData] = useState<Live[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        // Fetch transactions from Appwrite
-        const getTransactions = async () => {
-            if (!user?.id) return;
-            
-            // setIsLoading(true);
-            try {
-              const transactions = await fetchTransactions(user.id);
-              setTransactions(transactions);
-              console.log("Transactions:", transactions);
-            } catch (error) {
-              console.error("Error fetching transactions:", error);
-            } 
-          };
-    
-        getTransactions();
-      }, [user]);
+      const fetchData = async () => {
+          if (!user?.id) return;
+          
+          setIsLoading(true);
+          try {
+              // Fetch transactions and live data in parallel
+              const [transactionsRes, liveRes] = await Promise.all([
+                  fetchTransactions(user.id),
+                  fetch('/api/live-crypto').then(res => res.json())
+              ]);
+              
+              setTransactions(transactionsRes);
+              setLiveData(liveRes);
+          } catch (error) {
+              console.error("Error fetching data:", error);
+          } finally {
+              setIsLoading(false);
+          }
+      };
+
+      fetchData();
+  }, [user?.id]);
+
+   // Helper function to get crypto price and calculate value
+    const getCryptoData = (currency: string) => {
+        const crypto = liveData.find(c => c.name === currency);
+        return {
+            price: crypto?.price || 0,
+            value: crypto ? crypto.price : 0
+        };
+    };
 
     return (
       <Card>
@@ -138,46 +155,73 @@ export default function UserDetail({ user, onUpdateClick }: { user: SelectedUser
                         <TableHead>Date</TableHead>
                         <TableHead>Type</TableHead>
                         <TableHead>Token</TableHead>
+                        <TableHead>Price(in USD)</TableHead>
+                        <TableHead>Value(in USD)</TableHead>
                         <TableHead>Amount</TableHead>
                         <TableHead>Status</TableHead>
                     </TableRow>
                     </TableHeader>
                     <TableBody>
-                    {transactions.length > 0 ? (
-                        transactions.map((transaction) => (
-                        <TableRow key={transaction.$id}>                        
-                            <TableCell>
-                            {new Date(transaction.$createdAt).toLocaleDateString("en-US", {
-                                year: "numeric",
-                                month: "short",
-                                day: "numeric",
-                            })}
-                            </TableCell>
-                            <TableCell>{transaction.type}</TableCell>
-                            <TableCell>{transaction.token_name}</TableCell>
-                            <TableCell>{transaction.amount}</TableCell>
-                            <TableCell>
-                            <span
-                                className={`px-2 py-1 rounded-full text-xs ${
-                                transaction.status === "approved"
-                                    ? "bg-green-100 text-green-800"
-                                    : transaction.status === "pending"
-                                    ? "bg-yellow-100 text-yellow-800"
-                                    : "bg-red-100 text-red-800"
-                                }`}
-                            >
-                                {transaction.status}
-                            </span>
-                            </TableCell>
-                        </TableRow>
-                        ))
-                    ) : (
-                        <TableRow>
-                        <TableCell colSpan={4} className="text-center text-muted-foreground">
-                            No transactions found
-                        </TableCell>
-                        </TableRow>
-                    )}
+                    {isLoading ? (
+                                <TableRow>
+                                    <TableCell colSpan={7} className="text-center">
+                                        Loading transactions...
+                                    </TableCell>
+                                </TableRow>
+                            ) : transactions.length > 0 ? (
+                                transactions.map((transaction) => {
+                                    const cryptoData = getCryptoData(transaction.token_name);
+                                    const value = transaction.amount * cryptoData.price;
+                                    
+                                    return (
+                                        <TableRow key={transaction.$id}>                        
+                                            <TableCell>
+                                                {new Date(transaction.$createdAt).toLocaleDateString("en-US", {
+                                                    year: "numeric",
+                                                    month: "short",
+                                                    day: "numeric",
+                                                })}
+                                            </TableCell>
+                                            <TableCell>{transaction.type}</TableCell>
+                                            <TableCell>
+                                                <div className="flex items-center gap-2">
+                                                  {transaction.token_name}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                {cryptoData.price > 0 ? formatCurrency(cryptoData.price) : '-'}
+                                            </TableCell>
+                                            <TableCell>
+                                                {value > 0 ? formatCurrency(value) : '-'}
+                                            </TableCell>
+                                            <TableCell>
+                                                {transaction.amount.toLocaleString("en-US", {
+                                                    maximumFractionDigits: 8
+                                                })}
+                                            </TableCell>
+                                            <TableCell>
+                                                <span
+                                                    className={`px-2 py-1 rounded-full text-xs ${
+                                                        transaction.status === "approved"
+                                                            ? "bg-green-100 text-green-800"
+                                                            : transaction.status === "pending"
+                                                            ? "bg-yellow-100 text-yellow-800"
+                                                            : "bg-red-100 text-red-800"
+                                                    }`}
+                                                >
+                                                    {transaction.status}
+                                                </span>
+                                            </TableCell>
+                                        </TableRow>
+                                    );
+                                })
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={7} className="text-center text-muted-foreground">
+                                        No transactions found
+                                    </TableCell>
+                                </TableRow>
+                            )}
                     </TableBody>
                 </Table>
                 </div>
